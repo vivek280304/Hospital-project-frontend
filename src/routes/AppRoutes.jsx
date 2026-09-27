@@ -11,6 +11,7 @@ import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
 import DoctorSlots from "../pages/public/DoctorSlots";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
+import DoctorLogin from "../pages/doctor/DoctorLogin";
 
 function AppRoutes() {
   return (
@@ -61,6 +62,13 @@ function AppRoutes() {
         element={<PatientResetPassword />}
 
       />
+
+{/* ================= DOCTOR LOGIN ================= */}
+
+       <Route 
+       path="/doctor/login" 
+       element={<DoctorLogin />} 
+       />
 
       {/* ================= TEMP PATIENT DASHBOARD ================= */}
 
