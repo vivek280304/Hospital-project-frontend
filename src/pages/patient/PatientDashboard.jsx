@@ -990,7 +990,7 @@ function Appointments({
                 <div className="flex-1">
 
                   <h3 className="font-bold text-slate-800">
-                    Dr.{" "}
+                    {" "}
                     {appointment.doctorName}
                   </h3>
 
@@ -1078,7 +1078,7 @@ function Reports({ reports }) {
                   </h3>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    Dr.{" "}
+                    {" "}
                     {report.doctorName ||
                       "Doctor"}
                   </p>
@@ -1293,6 +1293,15 @@ function Profile({ profile }) {
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
+
+          <Info
+            label="Patient ID"
+            value={
+              profile?.id != null
+                ? `P-${String(profile.id).padStart(5, "0")}`
+                : "Not available"
+            }
+          />
 
           <Info
             label="Email"
@@ -1513,7 +1522,7 @@ function AllDoctors({
                     </div>
                     <div className="min-w-0">
                       <h3 className="truncate text-lg font-bold">
-                        Dr. {name}
+                        {name}
                       </h3>
                       <p className="mt-1 text-sm text-blue-100">
                         {specialization}
