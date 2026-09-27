@@ -8,6 +8,7 @@ import PatientRegister from "../pages/auth/patient/PatientRegister";
 import PatientVerifyOtp from "../pages/auth/patient/PatientVerifyOtp";
 import PatientForgotPassword from "../pages/auth/patient/PatientForgotPassword";
 import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
+import DoctorSlots from "../pages/public/DoctorSlots";
 
 function AppRoutes() {
   return (
@@ -24,6 +25,12 @@ function AppRoutes() {
         path="/doctors/:doctorId"
         element={<DoctorDetails />}
       />
+
+        <Route
+         path="/doctors/:doctorId/slots"
+        element={<DoctorSlots />}
+        />
+
 
       {/* ================= PATIENT AUTH ================= */}
 
