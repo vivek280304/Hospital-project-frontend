@@ -4,7 +4,12 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { HeartPulse, LogOut } from "lucide-react";
+
+import {
+  HeartPulse,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -152,9 +157,7 @@ function Navbar() {
             Home
           </Link>
 
-          {/* 
-            FIND DOCTORS REMOVED
-          */}
+          {/* FIND DOCTORS REMOVED */}
 
           {/* SERVICES */}
 
@@ -222,18 +225,35 @@ function Navbar() {
           /*
            * LOGGED IN
            *
-           * Show Logout
+           * Show Dashboard + Logout
            */
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-lg bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
-          >
-            <LogOut size={17} />
+          <div className="flex items-center gap-3">
 
-            Logout
-          </button>
+            {/* DASHBOARD */}
+
+            <Link
+              to="/patient/dashboard"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+            >
+              <LayoutDashboard size={17} />
+
+              Dashboard
+            </Link>
+
+            {/* LOGOUT */}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              <LogOut size={17} />
+
+              Logout
+            </button>
+
+          </div>
 
         )}
 

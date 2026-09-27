@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   CalendarDays,
   CheckCircle2,
+  XCircle,
   Clock,
   Loader2,
   Stethoscope,
@@ -27,6 +28,7 @@ function BookAppointment() {
 
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const [bookingResult, setBookingResult] = useState(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -71,6 +73,8 @@ function BookAppointment() {
   const handleBooking = async (e) => {
     e.preventDefault();
 
+    if (booking) return;
+
     if (!profile) {
       setError("Patient profile could not be loaded.");
       return;
@@ -78,6 +82,7 @@ function BookAppointment() {
 
     try {
       setBooking(true);
+      setBookingResult(null);
       setError("");
       setSuccess("");
 
@@ -99,24 +104,32 @@ function BookAppointment() {
 
       await patientService.bookAppointment(request);
 
-      setSuccess(
-        "Appointment booked successfully."
-      );
-
-      setTimeout(() => {
-        navigate("/patient/dashboard");
-      }, 1500);
+      setSuccess("Appointment booked successfully.");
+      setBookingResult("success");
     } catch (error) {
       console.error("Booking error:", error);
 
-      setError(
+      const message =
         error.response?.data?.message ||
-          error.message ||
-          "Unable to book appointment."
-      );
+        error.response?.data?.error ||
+        error.message ||
+        "Unable to book appointment.";
+
+      setError(message);
+      setBookingResult("failed");
     } finally {
       setBooking(false);
     }
+  };
+
+  const handleTryAgain = () => {
+    setBookingResult(null);
+    setError("");
+    setSuccess("");
+  };
+
+  const goToDashboard = () => {
+    navigate("/patient/dashboard", { replace: true });
   };
 
   if (loading) {
@@ -170,6 +183,154 @@ function BookAppointment() {
 
   return (
     <div className="min-h-screen bg-[#f5f9ff]">
+      {/* BOOKING RESULT / PROCESSING OVERLAY */}
+      {(booking || bookingResult) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 px-5 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/60 bg-white p-8 text-center shadow-2xl">
+            {booking && (
+              <>
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-50">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-100 border-t-blue-600">
+                    <Loader2
+                      size={30}
+                      className="animate-spin text-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <h2 className="mt-6 text-2xl font-bold text-[#10255c]">
+                  Confirming Appointment
+                </h2>
+
+                <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-500">
+                  Please wait while we confirm your appointment. This may
+                  take a few moments.
+                </p>
+
+                <div className="mt-6 rounded-2xl bg-blue-50 px-4 py-3 text-xs font-medium text-blue-700">
+                  Please do not close this page or press the button again.
+                </div>
+
+                <div className="mx-auto mt-6 h-1.5 w-40 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full w-1/2 animate-[bookingProgress_1.4s_ease-in-out_infinite] rounded-full bg-blue-600" />
+                </div>
+              </>
+            )}
+
+            {!booking && bookingResult === "success" && (
+              <>
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-green-50">
+                  <div className="flex h-16 w-16 animate-[bookingPop_0.45s_ease-out] items-center justify-center rounded-full bg-green-100">
+                    <CheckCircle2 size={40} className="text-green-600" />
+                  </div>
+                </div>
+
+                <h2 className="mt-6 text-2xl font-bold text-slate-900">
+                  Appointment Confirmed!
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  Your appointment has been booked successfully.
+                </p>
+
+                <div className="mt-6 rounded-2xl border border-green-100 bg-green-50 p-4 text-left">
+                  <p className="text-xs font-medium text-green-700">
+                    Appointment Details
+                  </p>
+
+                  <p className="mt-2 font-semibold text-slate-900">
+                    {doctorName}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-600">
+                    {appointmentData.appointmentDate}
+                    {" · "}
+                    {appointmentData.appointmentTime}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={goToDashboard}
+                  className="mt-6 w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Go to Dashboard
+                </button>
+              </>
+            )}
+
+            {!booking && bookingResult === "failed" && (
+              <>
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-red-50">
+                  <div className="flex h-16 w-16 animate-[bookingPop_0.45s_ease-out] items-center justify-center rounded-full bg-red-100">
+                    <XCircle size={40} className="text-red-600" />
+                  </div>
+                </div>
+
+                <h2 className="mt-6 text-2xl font-bold text-slate-900">
+                  Booking Failed
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  We could not confirm this appointment.
+                </p>
+
+                <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-4 text-left">
+                  <p className="text-xs font-semibold text-red-700">
+                    Server Response
+                  </p>
+                  <p className="mt-2 text-sm leading-5 text-red-600">
+                    {error || "Please try another available slot."}
+                  </p>
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={handleTryAgain}
+                    className="rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    Try Again
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={goToDashboard}
+                    className="rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Dashboard
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes bookingPop {
+          0% {
+            transform: scale(0.65);
+            opacity: 0;
+          }
+          70% {
+            transform: scale(1.08);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+
+        @keyframes bookingProgress {
+          0% {
+            transform: translateX(-120%);
+          }
+          100% {
+            transform: translateX(220%);
+          }
+        }
+      `}</style>
       <Navbar />
 
       <main className="mx-auto max-w-5xl px-5 py-8">
@@ -381,7 +542,7 @@ function BookAppointment() {
             <form onSubmit={handleBooking}>
               <button
                 type="submit"
-                disabled={booking || !!success}
+                disabled={booking || !!success || !!bookingResult}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {booking ? (
