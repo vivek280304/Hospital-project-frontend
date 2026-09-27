@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HeartPulse } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import PasswordLoginForm from "../../../components/auth/PasswordLoginForm";
 import OtpLoginForm from "../../../components/auth/OtpLoginForm";
@@ -8,10 +8,61 @@ import authService from "../../../services/authService";
 
 function PatientLogin() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [mode, setMode] = useState("password");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  /*
+   * Appointment selected before login.
+   *
+   * Example:
+   *
+   * {
+   *   doctorId: 12,
+   *   appointmentDate: "2026-09-28",
+   *   appointmentTime: "10:30"
+   * }
+   */
+  const appointmentData =
+    location.state?.appointmentData || null;
+
+  console.log(
+    "Appointment data received by login:",
+    appointmentData
+  );
+
+  /*
+   * Decide where the patient goes after successful login.
+   */
+  const goAfterLogin = () => {
+    console.log(
+      "Redirecting after login:",
+      appointmentData
+    );
+
+    /*
+     * Patient selected a doctor slot before login.
+     *
+     * Go to appointment booking page.
+     */
+    if (appointmentData) {
+      navigate("/patient/book-appointment", {
+        state: appointmentData,
+        replace: true,
+      });
+
+      return;
+    }
+
+    /*
+     * Normal patient login.
+     */
+    navigate("/patient/dashboard", {
+      replace: true,
+    });
+  };
 
   const handleLogin = async (data) => {
     try {
@@ -21,15 +72,17 @@ function PatientLogin() {
       const response = await authService.login(data);
 
       if (response.role !== "PATIENT") {
-        setError("This account does not belong to the Patient portal.");
+        setError(
+          "This account does not belong to the Patient portal."
+        );
         return;
       }
 
-      navigate("/patient/dashboard");
+      goAfterLogin();
     } catch (error) {
       setError(
         error.response?.data?.message ||
-        "Invalid email or password."
+          "Invalid email or password."
       );
     } finally {
       setLoading(false);
@@ -45,7 +98,7 @@ function PatientLogin() {
     } catch (error) {
       setError(
         error.response?.data?.message ||
-        "Unable to send OTP."
+          "Unable to send OTP."
       );
 
       throw error;
@@ -62,15 +115,17 @@ function PatientLogin() {
       const response = await authService.verifyOtp(data);
 
       if (response.role !== "PATIENT") {
-        setError("This account does not belong to the Patient portal.");
+        setError(
+          "This account does not belong to the Patient portal."
+        );
         return;
       }
 
-      navigate("/patient/dashboard");
+      goAfterLogin();
     } catch (error) {
       setError(
         error.response?.data?.message ||
-        "Invalid or expired OTP."
+          "Invalid or expired OTP."
       );
     } finally {
       setLoading(false);
@@ -79,10 +134,9 @@ function PatientLogin() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-
       <div className="grid min-h-screen lg:grid-cols-2">
 
-        {/* Branding */}
+        {/* BRANDING */}
         <div className="hidden bg-gradient-to-br from-blue-700 to-cyan-500 p-12 text-white lg:flex lg:flex-col lg:justify-between">
 
           <div className="flex items-center gap-3">
@@ -122,9 +176,10 @@ function PatientLogin() {
           <p className="text-sm text-blue-100">
             © 2026 MediCare Hospital
           </p>
+
         </div>
 
-        {/* Login */}
+        {/* LOGIN */}
         <div className="flex items-center justify-center p-6 sm:p-10">
 
           <div className="w-full max-w-md">
@@ -153,7 +208,7 @@ function PatientLogin() {
 
             <div className="rounded-3xl bg-white p-7 shadow-xl shadow-slate-200/60 sm:p-9">
 
-              {/* Login tabs */}
+              {/* LOGIN TABS */}
               <div className="mb-7 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
 
                 <button
@@ -188,12 +243,14 @@ function PatientLogin() {
 
               </div>
 
+              {/* ERROR */}
               {error && (
                 <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
 
+              {/* LOGIN FORM */}
               {mode === "password" ? (
                 <PasswordLoginForm
                   onSubmit={handleLogin}
@@ -218,6 +275,7 @@ function PatientLogin() {
                 />
               )}
 
+              {/* REGISTER */}
               <div className="my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
 
@@ -230,7 +288,9 @@ function PatientLogin() {
 
               <button
                 type="button"
-                onClick={() => navigate("/patient/register")}
+                onClick={() =>
+                  navigate("/patient/register")
+                }
                 className="w-full rounded-xl border border-slate-200 py-3.5 font-semibold text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
               >
                 Create Patient Account

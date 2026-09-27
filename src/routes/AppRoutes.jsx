@@ -9,6 +9,8 @@ import PatientVerifyOtp from "../pages/auth/patient/PatientVerifyOtp";
 import PatientForgotPassword from "../pages/auth/patient/PatientForgotPassword";
 import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
 import DoctorSlots from "../pages/public/DoctorSlots";
+import PatientDashboard from "../pages/patient/PatientDashboard";
+import BookAppointment from "../pages/patient/BookAppointment";
 
 function AppRoutes() {
   return (
@@ -57,20 +59,20 @@ function AppRoutes() {
       <Route
         path="/patient/reset-password"
         element={<PatientResetPassword />}
+
       />
 
       {/* ================= TEMP PATIENT DASHBOARD ================= */}
 
-      <Route
+        <Route
         path="/patient/dashboard"
-        element={
-          <div className="flex min-h-screen items-center justify-center">
-            <h1 className="text-3xl font-bold text-blue-600">
-              Patient Dashboard
-            </h1>
-          </div>
-        }
-      />
+        element={<PatientDashboard />}
+        />
+
+        <Route
+  path="/patient/book-appointment"
+  element={<BookAppointment />}
+/>
 
       {/* ================= 404 ================= */}
 

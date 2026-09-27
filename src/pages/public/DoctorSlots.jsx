@@ -18,8 +18,10 @@ function DoctorSlots() {
   const [doctor, setDoctor] = useState(null);
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState([]);
+
   const [loadingDoctor, setLoadingDoctor] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -64,10 +66,7 @@ function DoctorSlots() {
         selectedDate
       );
 
-      console.log(
-        "Available slots:",
-        data
-      );
+      console.log("Available slots:", data);
 
       if (Array.isArray(data)) {
         setSlots(data);
@@ -104,6 +103,95 @@ function DoctorSlots() {
       slot?.startTime ??
       String(slot)
     );
+  };
+
+  /*
+   * Check whether the patient is already logged in.
+   *
+   * Different versions of the auth code may use different
+   * localStorage names, so we check the common ones.
+   */
+  const isPatientLoggedIn = () => {
+    const tokenKeys = [
+      "token",
+      "accessToken",
+      "access_token",
+      "jwt",
+      "jwtToken",
+    ];
+
+    for (const key of tokenKeys) {
+      const token = localStorage.getItem(key);
+
+      if (token && token !== "null" && token !== "undefined") {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  /*
+   * Slot selection flow:
+   *
+   * LOGGED IN:
+   *
+   * Doctor
+   *   ↓
+   * Date
+   *   ↓
+   * Slot
+   *   ↓
+   * Book Appointment
+   *
+   * NOT LOGGED IN:
+   *
+   * Doctor
+   *   ↓
+   * Date
+   *   ↓
+   * Slot
+   *   ↓
+   * Login
+   *   ↓
+   * Book Appointment
+   */
+  const handleSlotSelection = (time) => {
+    const appointmentData = {
+      doctorId: Number(doctorId),
+      appointmentDate: date,
+      appointmentTime: time,
+    };
+
+    console.log("Selected appointment:", appointmentData);
+
+    const loggedIn = isPatientLoggedIn();
+
+    console.log("Patient logged in:", loggedIn);
+
+    if (loggedIn) {
+      /*
+       * Patient is already logged in.
+       *
+       * Do NOT send them to login.
+       * Go directly to appointment booking.
+       */
+      navigate("/patient/book-appointment", {
+        state: appointmentData,
+      });
+    } else {
+      /*
+       * Patient is not logged in.
+       *
+       * Send appointment data to login page so that
+       * after successful login we can continue booking.
+       */
+      navigate("/patient/login", {
+        state: {
+          appointmentData,
+        },
+      });
+    }
   };
 
   if (loadingDoctor) {
@@ -155,7 +243,7 @@ function DoctorSlots() {
           onClick={() =>
             navigate(`/doctors/${doctorId}`)
           }
-          className="mb-7 flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600"
+          className="mb-7 flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
         >
           <ArrowLeft size={18} />
           Back to Doctor
@@ -223,7 +311,7 @@ function DoctorSlots() {
               onChange={(e) =>
                 loadSlots(e.target.value)
               }
-              className="mt-6 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-6 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
 
           </div>
@@ -249,6 +337,7 @@ function DoctorSlots() {
               </div>
             </div>
 
+            {/* NO DATE */}
             {!date && (
               <div className="mt-10 text-center">
                 <CalendarDays
@@ -262,6 +351,7 @@ function DoctorSlots() {
               </div>
             )}
 
+            {/* LOADING */}
             {date && loadingSlots && (
               <div className="flex justify-center py-12">
                 <Loader2
@@ -271,6 +361,7 @@ function DoctorSlots() {
               </div>
             )}
 
+            {/* ERROR */}
             {date &&
               !loadingSlots &&
               error && (
@@ -279,6 +370,7 @@ function DoctorSlots() {
                 </div>
               )}
 
+            {/* EMPTY */}
             {date &&
               !loadingSlots &&
               !error &&
@@ -290,11 +382,13 @@ function DoctorSlots() {
                 </div>
               )}
 
+            {/* AVAILABLE SLOTS */}
             {date &&
               !loadingSlots &&
               !error &&
               slots.length > 0 && (
                 <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
+
                   {slots.map((slot, index) => {
                     const time = formatSlot(slot);
 
@@ -303,7 +397,7 @@ function DoctorSlots() {
                         key={`${time}-${index}`}
                         type="button"
                         onClick={() =>
-                          navigate("/patient/login")
+                          handleSlotSelection(time)
                         }
                         className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-600 transition hover:border-blue-600 hover:bg-blue-600 hover:text-white"
                       >
@@ -311,6 +405,7 @@ function DoctorSlots() {
                       </button>
                     );
                   })}
+
                 </div>
               )}
 

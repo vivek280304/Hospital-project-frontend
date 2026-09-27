@@ -52,6 +52,8 @@ function DoctorDetails() {
     loadDoctor();
   }, [doctorId]);
 
+  /* ================= LOADING ================= */
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -63,10 +65,13 @@ function DoctorDetails() {
     );
   }
 
+  /* ================= ERROR ================= */
+
   if (error) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-5">
         <div className="rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
+
           <p className="font-semibold text-red-600">
             {error}
           </p>
@@ -74,16 +79,21 @@ function DoctorDetails() {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="mt-5 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+            className="mt-5 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
           >
             Back Home
           </button>
+
         </div>
       </div>
     );
   }
 
-  if (!doctor) return null;
+  if (!doctor) {
+    return null;
+  }
+
+  /* ================= DOCTOR DATA ================= */
 
   const name =
     doctor.name ??
@@ -105,36 +115,56 @@ function DoctorDetails() {
     doctor.email ??
     doctor.user?.email;
 
+  /* ================= PAGE ================= */
+
   return (
     <div className="min-h-screen bg-[#f5f9ff]">
 
+      {/* ================= NAVBAR ================= */}
+
+      {/*
+        Find Doctors is removed globally from Navbar.
+
+        Logged-out patient:
+        Login + Sign Up
+
+        Logged-in patient:
+        Logout
+      */}
       <Navbar />
 
-      {/* BACK */}
+      {/* ================= BACK ================= */}
+
       <div className="mx-auto max-w-7xl px-5 pt-7">
+
         <button
           type="button"
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
         >
           <ArrowLeft size={18} />
+
           Back to Doctors
         </button>
+
       </div>
 
       <main className="mx-auto max-w-7xl px-5 py-8">
 
-        {/* PROFILE */}
+        {/* ================= PROFILE ================= */}
+
         <section className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm">
 
           {/* TOP BLUE AREA */}
+
           <div className="h-32 bg-gradient-to-r from-blue-600 to-blue-500" />
 
           <div className="px-6 pb-8 md:px-10">
 
             <div className="-mt-20 flex flex-col gap-7 md:flex-row md:items-end">
 
-              {/* IMAGE */}
+              {/* ================= IMAGE ================= */}
+
               <div className="flex h-40 w-40 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-8 border-white bg-blue-50 text-blue-500 shadow-lg">
 
                 {doctor.image ? (
@@ -152,19 +182,29 @@ function DoctorDetails() {
 
               </div>
 
-              {/* BASIC INFO */}
+              {/* ================= BASIC INFO ================= */}
+
               <div className="flex-1 pb-1">
 
                 <div className="flex flex-wrap items-center gap-2">
+
+                  {/* SPECIALIZATION */}
+
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
                     {specialization}
                   </span>
 
+                  {/* VERIFIED */}
+
                   <span className="flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600">
                     <CircleCheck size={14} />
+
                     Verified Doctor
                   </span>
+
                 </div>
+
+                {/* NAME */}
 
                 <h1 className="mt-3 text-3xl font-extrabold text-[#10255c] md:text-4xl">
                   {name}
@@ -178,7 +218,8 @@ function DoctorDetails() {
 
             </div>
 
-            {/* DETAILS */}
+            {/* ================= DETAILS ================= */}
+
             <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
               <InfoCard
@@ -208,10 +249,12 @@ function DoctorDetails() {
           </div>
         </section>
 
-        {/* ABOUT + BOOK */}
+        {/* ================= ABOUT + BOOK ================= */}
+
         <section className="mt-7 grid gap-7 lg:grid-cols-[1fr_380px]">
 
-          {/* ABOUT */}
+          {/* ================= ABOUT ================= */}
+
           <div className="rounded-3xl border border-blue-100 bg-white p-7 shadow-sm">
 
             <h2 className="text-xl font-bold text-[#10255c]">
@@ -225,8 +268,11 @@ function DoctorDetails() {
               continue with your booking.
             </p>
 
+            {/* EMAIL */}
+
             {email && (
               <div className="mt-6 border-t border-slate-100 pt-5">
+
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Contact
                 </p>
@@ -234,12 +280,14 @@ function DoctorDetails() {
                 <p className="mt-2 text-sm text-slate-600">
                   {email}
                 </p>
+
               </div>
             )}
 
           </div>
 
-          {/* BOOK */}
+          {/* ================= BOOK APPOINTMENT ================= */}
+
           <div className="rounded-3xl bg-[#10255c] p-7 text-white shadow-lg">
 
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
@@ -255,6 +303,8 @@ function DoctorDetails() {
               appointment slots.
             </p>
 
+            {/* CHECK AVAILABLE SLOTS */}
+
             <button
               type="button"
               onClick={() =>
@@ -263,11 +313,12 @@ function DoctorDetails() {
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-blue-600 transition hover:bg-blue-50"
             >
               Check Available Slots
+
               <ArrowRight size={18} />
             </button>
 
             <p className="mt-4 text-center text-xs text-blue-200">
-              Appointment booking requires patient authentication
+              Select a date and time to continue with your appointment
             </p>
 
           </div>
@@ -278,6 +329,8 @@ function DoctorDetails() {
     </div>
   );
 }
+
+/* ================= INFO CARD ================= */
 
 function InfoCard({ icon: Icon, title, value }) {
   return (
@@ -290,6 +343,7 @@ function InfoCard({ icon: Icon, title, value }) {
         </div>
 
         <div>
+
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             {title}
           </p>
@@ -297,6 +351,7 @@ function InfoCard({ icon: Icon, title, value }) {
           <p className="mt-1 text-sm font-bold text-slate-800">
             {value}
           </p>
+
         </div>
 
       </div>
