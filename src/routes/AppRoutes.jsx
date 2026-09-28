@@ -12,6 +12,10 @@ import DoctorSlots from "../pages/public/DoctorSlots";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
 import DoctorLogin from "../pages/doctor/DoctorLogin";
+import DoctorDashboard from "../pages/doctor/DoctorDashboard";
+import DoctorAppointments from "../pages/doctor/DoctorAppointments";
+import PatientDetails from "../pages/doctor/PatientDetails";
+import DoctorPatients from "../pages/doctor/DoctorPatients";
 
 function AppRoutes() {
   return (
@@ -63,12 +67,7 @@ function AppRoutes() {
 
       />
 
-{/* ================= DOCTOR LOGIN ================= */}
 
-       <Route 
-       path="/doctor/login" 
-       element={<DoctorLogin />} 
-       />
 
       {/* ================= TEMP PATIENT DASHBOARD ================= */}
 
@@ -81,6 +80,34 @@ function AppRoutes() {
   path="/patient/book-appointment"
   element={<BookAppointment />}
 />
+
+{/* ================= DOCTOR ================= */}
+
+       <Route 
+       path="/doctor/login" 
+       element={<DoctorLogin />} 
+       />
+
+       <Route
+        path="/doctor/dashboard"
+        element={<DoctorDashboard />}
+        />
+
+        <Route
+  path="/doctor/appointments"
+  element={<DoctorAppointments />}
+/>
+
+<Route
+  path="/doctor/appointments/:appointmentId/patient"
+  element={<PatientDetails />}
+/>
+
+<Route
+  path="/doctor/patients"
+  element={<DoctorPatients />}
+/>
+
 
       {/* ================= 404 ================= */}
 
