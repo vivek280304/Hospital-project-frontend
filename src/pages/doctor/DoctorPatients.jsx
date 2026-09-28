@@ -1,32 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  CalendarDays,
-  Eye,
   Search,
   UserRound,
+  History,
+  Loader2,
+  Users,
+  Mail,
+  Phone,
 } from "lucide-react";
 
 import doctorService from "../../services/doctorService";
 
-const formatLocalDate = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
 function DoctorPatients() {
   const navigate = useNavigate();
 
-  const [date, setDate] = useState(() =>
-    formatLocalDate(new Date())
-  );
-
-  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -35,11 +27,20 @@ function DoctorPatients() {
       setLoading(true);
       setError("");
 
-      const data = await doctorService.getAppointments(date);
+      const data = await doctorService.getMyPatients();
 
-      setAppointments(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) {
+        setPatients(data);
+      } else if (Array.isArray(data?.patients)) {
+        setPatients(data.patients);
+      } else {
+        setPatients([]);
+      }
     } catch (err) {
-      console.error("Failed to load patients:", err);
+      console.error(
+        "Failed to load patients:",
+        err
+      );
 
       setError(
         err?.response?.data?.message ||
@@ -52,266 +53,287 @@ function DoctorPatients() {
 
   useEffect(() => {
     loadPatients();
-  }, [date]);
+  }, []);
 
-  const filteredAppointments = appointments.filter((appointment) => {
+  const filteredPatients = useMemo(() => {
     const query = search.trim().toLowerCase();
 
     if (!query) {
-      return true;
+      return patients;
     }
 
+    return patients.filter((patient) => {
+      const values = [
+        patient.patientId,
+        patient.id,
+        patient.name,
+        patient.patientName,
+        patient.email,
+        patient.phoneNumber,
+        patient.phone,
+      ];
+
+      return values.some((value) =>
+        String(value || "")
+          .toLowerCase()
+          .includes(query)
+      );
+    });
+  }, [patients, search]);
+
+  const getPatientId = (patient) => {
     return (
-      String(appointment.patientName || "")
-        .toLowerCase()
-        .includes(query) ||
-      String(appointment.patientId || "")
-        .toLowerCase()
-        .includes(query) ||
-      String(appointment.reason || "")
-        .toLowerCase()
-        .includes(query)
+      patient.patientId ??
+      patient.id ??
+      patient.userId
     );
-  });
+  };
+
+  const getPatientName = (patient) => {
+    return (
+      patient.patientName ??
+      patient.name ??
+      "Unknown Patient"
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-
+    <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white">
-        <div className="flex items-center px-6 py-5">
-
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate("/doctor/dashboard")}
-            className="mr-4 rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+            onClick={() =>
+              navigate("/doctor/dashboard")
+            }
+            className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600"
           >
-            <ArrowLeft size={21} />
+            <ArrowLeft size={18} />
+            Dashboard
           </button>
 
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              Patient Details
-            </h1>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Users size={24} />
+            </div>
 
-            <p className="text-sm text-slate-500">
-              View patients and their appointments
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                My Patients
+              </h1>
+
+              <p className="mt-1 text-sm text-slate-500">
+                View your patients and their complete
+                medical history.
+              </p>
+            </div>
           </div>
-
         </div>
       </header>
 
-      <main className="p-6">
-
-        {/* Filters */}
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
-            {/* Date */}
-            <div className="flex items-center gap-3">
-
-              <CalendarDays
-                size={20}
-                className="text-blue-600"
-              />
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-500">
-                  Appointment Date
-                </label>
-
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
-                />
-              </div>
-
-            </div>
-
-            {/* Search */}
-            <div className="relative w-full md:w-80">
-
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-
-              <input
-                type="text"
-                placeholder="Search patient..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
         {/* Error */}
         {error && (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {/* Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        {/* Search */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div className="relative">
+            <Search
+              size={19}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
 
-          {loading ? (
-            <div className="flex min-h-[300px] items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-            </div>
-          ) : filteredAppointments.length === 0 ? (
-            <div className="flex min-h-[300px] flex-col items-center justify-center">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              placeholder="Search patient by name, ID, email or phone..."
+              className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </section>
 
-              <UserRound
-                size={45}
-                className="mb-3 text-slate-300"
-              />
+        {/* Count */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-slate-500">
+              Total Patients
+            </p>
 
-              <h3 className="font-semibold text-slate-700">
-                No patients found
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-500">
-                No appointments found for this date.
-              </p>
-
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-
-              <table className="w-full">
-
-                <thead className="border-b border-slate-200 bg-slate-50">
-
-                  <tr>
-
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">
-                      Patient
-                    </th>
-
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">
-                      Patient ID
-                    </th>
-
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">
-                      Time
-                    </th>
-
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">
-                      Reason
-                    </th>
-
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">
-                      Status
-                    </th>
-
-                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase text-slate-500">
-                      Action
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody className="divide-y divide-slate-100">
-
-                  {filteredAppointments.map((appointment) => (
-
-                    <tr
-                      key={appointment.appointmentId}
-                      className="hover:bg-slate-50"
-                    >
-
-                      <td className="px-6 py-4">
-
-                        <div className="flex items-center gap-3">
-
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                            <UserRound size={19} />
-                          </div>
-
-                          <div>
-                            <p className="font-semibold text-slate-900">
-                              {appointment.patientName || "Unknown"}
-                            </p>
-
-                            <p className="text-xs text-slate-500">
-                              Patient
-                            </p>
-                          </div>
-
-                        </div>
-
-                      </td>
-
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        P-
-                        {String(appointment.patientId || "").padStart(
-                          5,
-                          "0"
-                        )}
-                      </td>
-
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {appointment.appointmentTime || "-"}
-                      </td>
-
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {appointment.reason || "General consultation"}
-                      </td>
-
-                      <td className="px-6 py-4">
-
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-                          {appointment.status || "BOOKED"}
-                        </span>
-
-                      </td>
-
-                      <td className="px-6 py-4 text-right">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate(
-                              `/doctor/appointments/${appointment.appointmentId}/patient`,
-                              {
-                                state: {
-                                  appointment,
-                                },
-                              }
-                            )
-                          }
-                          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                        >
-                          <Eye size={16} />
-                          View
-                        </button>
-
-                      </td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-          )}
-
+            <p className="text-2xl font-bold text-slate-900">
+              {filteredPatients.length}
+            </p>
+          </div>
         </div>
 
+        {/* Table */}
+        <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[850px]">
+              <thead>
+                <tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <th className="px-6 py-4">
+                    Patient
+                  </th>
+
+                  <th className="px-6 py-4">
+                    Patient ID
+                  </th>
+
+                  <th className="px-6 py-4">
+                    Contact
+                  </th>
+
+                  <th className="px-6 py-4">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="py-16 text-center"
+                    >
+                      <Loader2
+                        size={28}
+                        className="mx-auto animate-spin text-blue-600"
+                      />
+
+                      <p className="mt-3 text-sm text-slate-500">
+                        Loading patients...
+                      </p>
+                    </td>
+                  </tr>
+                ) : filteredPatients.length ===
+                  0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="py-16 text-center"
+                    >
+                      <Users
+                        size={32}
+                        className="mx-auto text-slate-300"
+                      />
+
+                      <p className="mt-3 text-sm text-slate-500">
+                        No patients found.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPatients.map(
+                    (patient, index) => {
+                      const patientId =
+                        getPatientId(patient);
+
+                      return (
+                        <tr
+                          key={
+                            patientId ?? index
+                          }
+                          className="border-t border-slate-100 hover:bg-slate-50"
+                        >
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                <UserRound
+                                  size={20}
+                                />
+                              </div>
+
+                              <div>
+                                <p className="font-semibold text-slate-800">
+                                  {getPatientName(
+                                    patient
+                                  )}
+                                </p>
+
+                                <p className="text-xs text-slate-400">
+                                  Patient
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-6 py-5 text-sm text-slate-600">
+                            {patientId != null
+                              ? `P-${String(
+                                  patientId
+                                ).padStart(5, "0")}`
+                              : "—"}
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <div className="space-y-1">
+                              {patient.email && (
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <Mail
+                                    size={14}
+                                  />
+                                  {patient.email}
+                                </div>
+                              )}
+
+                              {(patient.phoneNumber ||
+                                patient.phone) && (
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <Phone
+                                    size={14}
+                                  />
+                                  {patient.phoneNumber ||
+                                    patient.phone}
+                                </div>
+                              )}
+
+                              {!patient.email &&
+                                !patient.phoneNumber &&
+                                !patient.phone && (
+                                  <span className="text-sm text-slate-400">
+                                    —
+                                  </span>
+                                )}
+                            </div>
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <button
+                              type="button"
+                              disabled={
+                                patientId == null
+                              }
+                              onClick={() =>
+                                navigate(
+                                  `/doctor/patients/${patientId}/history`
+                                )
+                              }
+                              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <History
+                                size={16}
+                              />
+                              History
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
   );

@@ -1,27 +1,38 @@
 import { Routes, Route } from "react-router-dom";
 
+// Public
 import Home from "../pages/public/Home";
 import DoctorDetails from "../pages/public/DoctorDetails";
+import DoctorSlots from "../pages/public/DoctorSlots";
 
+// Patient Auth
 import PatientLogin from "../pages/auth/patient/PatientLogin";
 import PatientRegister from "../pages/auth/patient/PatientRegister";
 import PatientVerifyOtp from "../pages/auth/patient/PatientVerifyOtp";
 import PatientForgotPassword from "../pages/auth/patient/PatientForgotPassword";
 import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
-import DoctorSlots from "../pages/public/DoctorSlots";
+
+// Patient
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
+
+// Doctor Auth
 import DoctorLogin from "../pages/doctor/DoctorLogin";
+
+// Doctor
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import DoctorAppointments from "../pages/doctor/DoctorAppointments";
-import PatientDetails from "../pages/doctor/PatientDetails";
 import DoctorPatients from "../pages/doctor/DoctorPatients";
+import PatientHistory from "../pages/doctor/PatientHistory";
+import DoctorProfile from "../pages/doctor/DoctorProfile";
+import MedicalReport from "../pages/doctor/MedicalReport";
 
 function AppRoutes() {
   return (
     <Routes>
-
-      {/* ================= PUBLIC ================= */}
+      {/* =========================
+          PUBLIC
+      ========================== */}
 
       <Route
         path="/"
@@ -33,13 +44,14 @@ function AppRoutes() {
         element={<DoctorDetails />}
       />
 
-        <Route
-         path="/doctors/:doctorId/slots"
+      <Route
+        path="/doctors/:doctorId/slots"
         element={<DoctorSlots />}
-        />
+      />
 
-
-      {/* ================= PATIENT AUTH ================= */}
+      {/* =========================
+          PATIENT AUTH
+      ========================== */}
 
       <Route
         path="/patient/login"
@@ -52,7 +64,7 @@ function AppRoutes() {
       />
 
       <Route
-        path="/patient/verify-registration"
+        path="/patient/verify-otp"
         element={<PatientVerifyOtp />}
       />
 
@@ -64,70 +76,84 @@ function AppRoutes() {
       <Route
         path="/patient/reset-password"
         element={<PatientResetPassword />}
-
       />
 
-
-
-      {/* ================= TEMP PATIENT DASHBOARD ================= */}
-
-        <Route
-        path="/patient/dashboard"
-        element={<PatientDashboard />}
-        />
-
-        <Route
-  path="/patient/book-appointment"
-  element={<BookAppointment />}
-/>
-
-{/* ================= DOCTOR ================= */}
-
-       <Route 
-       path="/doctor/login" 
-       element={<DoctorLogin />} 
-       />
-
-       <Route
-        path="/doctor/dashboard"
-        element={<DoctorDashboard />}
-        />
-
-        <Route
-  path="/doctor/appointments"
-  element={<DoctorAppointments />}
-/>
-
-<Route
-  path="/doctor/appointments/:appointmentId/patient"
-  element={<PatientDetails />}
-/>
-
-<Route
-  path="/doctor/patients"
-  element={<DoctorPatients />}
-/>
-
-
-      {/* ================= 404 ================= */}
+      {/* =========================
+          PATIENT
+      ========================== */}
 
       <Route
-        path="*"
-        element={
-          <div className="flex min-h-screen items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-5xl font-bold text-slate-800">
-                404
-              </h1>
-
-              <p className="mt-3 text-slate-500">
-                Page not found
-              </p>
-            </div>
-          </div>
-        }
+        path="/patient/dashboard"
+        element={<PatientDashboard />}
       />
 
+      <Route
+        path="/patient/book-appointment"
+        element={<BookAppointment />}
+      />
+
+      {/* =========================
+          DOCTOR AUTH
+      ========================== */}
+
+      <Route
+        path="/doctor/login"
+        element={<DoctorLogin />}
+      />
+
+      {/* =========================
+          DOCTOR DASHBOARD
+      ========================== */}
+
+      <Route
+        path="/doctor/dashboard"
+        element={<DoctorDashboard />}
+      />
+
+      {/* =========================
+          DOCTOR APPOINTMENTS
+      ========================== */}
+
+      <Route
+        path="/doctor/appointments"
+        element={<DoctorAppointments />}
+      />
+
+      {/* =========================
+          DOCTOR REPORT
+      ========================== */}
+
+      <Route
+        path="/doctor/appointments/:appointmentId/report"
+        element={<MedicalReport />}
+      />
+
+      {/* =========================
+          DOCTOR PATIENTS
+      ========================== */}
+
+      <Route
+        path="/doctor/patients"
+        element={<DoctorPatients />}
+      />
+
+      {/* =========================
+          PATIENT HISTORY
+      ========================== */}
+
+      <Route
+        path="/doctor/patients/:patientId/history"
+        element={<PatientHistory />}
+      />
+
+      {/* =========================
+          DOCTOR PROFILE
+      ========================== */}
+
+      <Route
+        path="/doctor/profile"
+        element={<DoctorProfile />}
+      />
     </Routes>
   );
 }

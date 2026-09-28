@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import doctorService from "../../services/doctorService";
+
 import {
-  Bell,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -20,89 +20,325 @@ import {
   X,
 } from "lucide-react";
 
+/* ============================================================
+   DATE FORMAT
+============================================================ */
+
 const formatLocalDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
+
   return `${year}-${month}-${day}`;
 };
 
+/* ============================================================
+   NORMALIZE PATIENT ID
+   Supports:
+   3
+   P-00003
+   p-00003
+============================================================ */
+
+const normalizePatientId = (value) => {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/^p-/, "")
+    .replace(/^0+/, "") || "0";
+};
+
+/* ============================================================
+   DOCTOR DASHBOARD
+============================================================ */
+
 function DoctorDashboard() {
   const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [profile, setProfile] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [imagingOrders, setImagingOrders] = useState([]);
   const [sharedPatients, setSharedPatients] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [dataError, setDataError] = useState("");
-  const [scheduleDate, setScheduleDate] = useState(() => formatLocalDate(new Date()));
-  const [searchQuery, setSearchQuery] = useState("");
 
+  const [scheduleDate, setScheduleDate] = useState(() =>
+    formatLocalDate(new Date())
+  );
+
+  /* ==========================================================
+     SEARCH
+  ========================================================== */
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const today = formatLocalDate(new Date());
 
+  /* ==========================================================
+     LOAD DASHBOARD
+  ========================================================== */
+
   const loadDashboard = async () => {
-      try {
-        setLoading(true);
-        setDataError("");
+    try {
+      setLoading(true);
+      setDataError("");
 
-        const results = await Promise.allSettled([
-          doctorService.getProfile(),
-          doctorService.getAppointments(scheduleDate),
-          doctorService.getImagingOrders(),
-          doctorService.getSharedPatients(),
-        ]);
+      const results = await Promise.allSettled([
+        doctorService.getProfile(),
+        doctorService.getAppointments(scheduleDate),
+        doctorService.getImagingOrders(),
+        doctorService.getSharedPatients(),
+      ]);
 
-        const [profileResult, appointmentsResult, imagingResult, patientsResult] = results;
+      const [
+        profileResult,
+        appointmentsResult,
+        imagingResult,
+        patientsResult,
+      ] = results;
 
-        if (profileResult.status === "fulfilled") {
-          setProfile(profileResult.value);
-        }
-
-        if (appointmentsResult.status === "fulfilled") {
-          setAppointments(Array.isArray(appointmentsResult.value) ? appointmentsResult.value : []);
-        }
-
-        if (imagingResult.status === "fulfilled") {
-          setImagingOrders(Array.isArray(imagingResult.value) ? imagingResult.value : []);
-        }
-
-        if (patientsResult.status === "fulfilled") {
-          setSharedPatients(Array.isArray(patientsResult.value) ? patientsResult.value : []);
-        }
-
-        if (results.every((result) => result.status === "rejected")) {
-          setDataError("Unable to load doctor dashboard data.");
-        }
-      } catch (error) {
-        console.error("Doctor dashboard error:", error);
-        setDataError("Unable to load doctor dashboard data.");
-      } finally {
-        setLoading(false);
+      if (profileResult.status === "fulfilled") {
+        setProfile(profileResult.value);
       }
-    };
+
+      if (appointmentsResult.status === "fulfilled") {
+        setAppointments(
+          Array.isArray(appointmentsResult.value)
+            ? appointmentsResult.value
+            : []
+        );
+      }
+
+      if (imagingResult.status === "fulfilled") {
+        setImagingOrders(
+          Array.isArray(imagingResult.value)
+            ? imagingResult.value
+            : []
+        );
+      }
+
+      if (patientsResult.status === "fulfilled") {
+        setSharedPatients(
+          Array.isArray(patientsResult.value)
+            ? patientsResult.value
+            : []
+        );
+      }
+
+      if (results.every((result) => result.status === "rejected")) {
+        setDataError(
+          "Unable to load doctor dashboard data."
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Doctor dashboard error:",
+        error
+      );
+
+      setDataError(
+        "Unable to load doctor dashboard data."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadDashboard();
   }, [scheduleDate]);
 
+  /* ==========================================================
+     APPOINTMENT COUNTS
+  ========================================================== */
+
   const bookedAppointments = useMemo(
-    () => appointments.filter((appointment) => appointment.status === "BOOKED"),
+    () =>
+      appointments.filter(
+        (appointment) =>
+          String(appointment.status).toUpperCase() ===
+          "BOOKED"
+      ),
     [appointments]
   );
 
   const completedAppointments = useMemo(
-    () => appointments.filter((appointment) => appointment.status === "COMPLETED"),
+    () =>
+      appointments.filter(
+        (appointment) =>
+          String(appointment.status).toUpperCase() ===
+          "COMPLETED"
+      ),
     [appointments]
   );
 
+  /* ==========================================================
+     FILTER TODAY'S APPOINTMENTS
+  ========================================================== */
+
   const filteredAppointments = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return appointments;
-    return appointments.filter((a) => [a.patientName, a.patientId, a.reason, a.appointmentTime].filter(Boolean).some((v) => String(v).toLowerCase().includes(q)));
+    const query = searchQuery
+      .trim()
+      .toLowerCase();
+
+    if (!query) {
+      return appointments;
+    }
+
+    return appointments.filter((appointment) => {
+      const patientName = String(
+        appointment.patientName || ""
+      ).toLowerCase();
+
+      const patientId = String(
+        appointment.patientId || ""
+      ).toLowerCase();
+
+      const reason = String(
+        appointment.reason || ""
+      ).toLowerCase();
+
+      const appointmentTime = String(
+        appointment.appointmentTime || ""
+      ).toLowerCase();
+
+      return (
+        patientName.includes(query) ||
+        patientId.includes(query) ||
+        reason.includes(query) ||
+        appointmentTime.includes(query)
+      );
+    });
   }, [appointments, searchQuery]);
+
+  /* ==========================================================
+     PATIENT SEARCH
+     
+     Search by:
+     - Patient name
+     - Patient ID
+     - P-00003
+     - 3
+     
+     Then open:
+     /doctor/patients/3/history
+  ========================================================== */
+
+  const handlePatientSearch = (event) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    const query = searchQuery.trim();
+
+    if (!query) {
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase();
+
+    const normalizedSearchId =
+      normalizePatientId(query);
+
+    /* --------------------------------------------------------
+       SEARCH IN SHARED PATIENTS
+    -------------------------------------------------------- */
+
+    const sharedPatient = sharedPatients.find(
+      (patient) => {
+        const patientName =
+          patient.patientName ||
+          patient.name ||
+          "";
+
+        const patientId =
+          patient.patientId ??
+          patient.id;
+
+        const normalizedPatientId =
+          normalizePatientId(patientId);
+
+        const nameMatches =
+          String(patientName)
+            .toLowerCase()
+            .includes(lowerQuery);
+
+        const idMatches =
+          normalizedPatientId ===
+          normalizedSearchId;
+
+        return nameMatches || idMatches;
+      }
+    );
+
+    /* --------------------------------------------------------
+       IF NOT FOUND, SEARCH TODAY'S APPOINTMENTS
+    -------------------------------------------------------- */
+
+    const appointmentPatient =
+      appointments.find((appointment) => {
+        const patientName =
+          appointment.patientName || "";
+
+        const patientId =
+          appointment.patientId;
+
+        const normalizedPatientId =
+          normalizePatientId(patientId);
+
+        const nameMatches =
+          String(patientName)
+            .toLowerCase()
+            .includes(lowerQuery);
+
+        const idMatches =
+          normalizedPatientId ===
+          normalizedSearchId;
+
+        return nameMatches || idMatches;
+      });
+
+    /* --------------------------------------------------------
+       GET PATIENT ID
+    -------------------------------------------------------- */
+
+    const patient =
+      sharedPatient || appointmentPatient;
+
+    const patientId =
+      patient?.patientId ??
+      patient?.id;
+
+    /* --------------------------------------------------------
+       OPEN PATIENT HISTORY
+    -------------------------------------------------------- */
+
+    if (patientId != null) {
+      setSearchQuery("");
+      setDataError("");
+
+      navigate(
+        `/doctor/patients/${patientId}/history`
+      );
+
+      return;
+    }
+
+    /* --------------------------------------------------------
+       PATIENT NOT FOUND
+    -------------------------------------------------------- */
+
+    setDataError(
+      "Patient not found. Please enter a valid patient name or ID."
+    );
+  };
+
+  /* ==========================================================
+     DOCTOR INFORMATION
+  ========================================================== */
 
   const doctorName =
     profile?.name ||
@@ -113,6 +349,10 @@ function DoctorDashboard() {
     profile?.specialization ||
     "";
 
+  /* ==========================================================
+     LOGOUT
+  ========================================================== */
+
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
@@ -121,6 +361,10 @@ function DoctorDashboard() {
       replace: true,
     });
   };
+
+  /* ==========================================================
+     UI
+  ========================================================== */
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -132,7 +376,9 @@ function DoctorDashboard() {
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() =>
+            setSidebarOpen(false)
+          }
         />
       )}
 
@@ -171,7 +417,10 @@ function DoctorDashboard() {
           </div>
 
           <button
-            onClick={() => setSidebarOpen(false)}
+            type="button"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
             className="ml-auto lg:hidden"
           >
             <X size={22} />
@@ -190,12 +439,13 @@ function DoctorDashboard() {
             </div>
 
             <div>
+
               <p className="font-semibold">
-                {doctorName}
+                {doctorName || "Doctor"}
               </p>
 
               <p className="text-sm text-slate-300">
-                {specialization}
+                {specialization || "Medical Specialist"}
               </p>
 
               <div className="mt-1 flex items-center gap-1.5">
@@ -222,20 +472,26 @@ function DoctorDashboard() {
             icon={<Home size={20} />}
             label="Dashboard"
             active
-            onClick={() => navigate("/doctor/dashboard")}
+            onClick={() =>
+              navigate("/doctor/dashboard")
+            }
           />
 
           <SidebarItem
             icon={<CalendarDays size={20} />}
             label="My Appointments"
-            onClick={() => navigate("/doctor/appointments")}
+            onClick={() =>
+              navigate("/doctor/appointments")
+            }
           />
 
-         <SidebarItem
-  icon={<UserRound size={20} />}
-  label="Patient Details"
-  onClick={() => navigate("/doctor/patients")}
-/>
+          <SidebarItem
+            icon={<UserRound size={20} />}
+            label="My Patients"
+            onClick={() =>
+              navigate("/doctor/patients")
+            }
+          />
 
           <SidebarItem
             icon={<FileText size={20} />}
@@ -250,12 +506,23 @@ function DoctorDashboard() {
           <SidebarItem
             icon={<CalendarDays size={20} />}
             label="My Schedule"
-            onClick={() => document.getElementById("doctor-schedule")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() =>
+              document
+                .getElementById(
+                  "doctor-schedule"
+                )
+                ?.scrollIntoView({
+                  behavior: "smooth",
+                })
+            }
           />
 
           <SidebarItem
             icon={<UserRound size={20} />}
             label="Profile"
+            onClick={() =>
+              navigate("/doctor/profile")
+            }
           />
 
           <SidebarItem
@@ -270,10 +537,12 @@ function DoctorDashboard() {
         <div className="border-t border-white/10 p-4">
 
           <button
+            type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-red-400 transition hover:bg-red-500/10"
           >
             <LogOut size={21} />
+
             <span className="font-medium">
               Logout
             </span>
@@ -295,14 +564,21 @@ function DoctorDashboard() {
 
         <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
 
+          {/* Mobile Menu */}
+
           <button
-            onClick={() => setSidebarOpen(true)}
+            type="button"
+            onClick={() =>
+              setSidebarOpen(true)
+            }
             className="mr-4 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
           >
             <Menu size={23} />
           </button>
 
-          {/* Search */}
+          {/* =================================================
+              PATIENT SEARCH
+          ================================================== */}
 
           <div className="relative hidden max-w-xl flex-1 md:block">
 
@@ -314,24 +590,27 @@ function DoctorDashboard() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search patient by name or ID..."
+              onChange={(event) => {
+                setSearchQuery(
+                  event.target.value
+                );
+
+                if (dataError) {
+                  setDataError("");
+                }
+              }}
+              onKeyDown={handlePatientSearch}
+              placeholder="Search patient by name or ID and press Enter..."
               className="w-full rounded-xl bg-slate-100 py-3 pl-12 pr-4 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100"
             />
 
           </div>
 
-          {/* Right */}
+          {/* Right Side */}
 
           <div className="ml-auto flex items-center gap-5">
 
-            <button className="relative rounded-full p-2 text-slate-600 hover:bg-slate-100">
-
-              <Bell size={22} />
-
-              <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500" />
-
-            </button>
+            {/* Bell removed */}
 
             <div className="hidden h-8 w-px bg-slate-200 sm:block" />
 
@@ -344,11 +623,12 @@ function DoctorDashboard() {
               <div className="hidden sm:block">
 
                 <p className="text-sm font-bold text-slate-800">
-                  Doctor
+                  {doctorName || "Doctor"}
                 </p>
 
                 <p className="text-xs text-slate-500">
-                  Medical Specialist
+                  {specialization ||
+                    "Medical Specialist"}
                 </p>
 
               </div>
@@ -365,20 +645,26 @@ function DoctorDashboard() {
 
         <main className="p-4 sm:p-6">
 
+          {/* Error */}
+
           {dataError && (
             <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {dataError}
             </div>
           )}
 
-          {/* Welcome */}
+          {/* =================================================
+              WELCOME
+          ================================================== */}
 
           <section className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 p-6">
 
             <div className="relative z-10">
 
               <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                {doctorName ? `Welcome, ${doctorName}!` : "Doctor Dashboard"}
+                {doctorName
+                  ? `Welcome, ${doctorName}!`
+                  : "Doctor Dashboard"}
               </h2>
 
               <p className="mt-2 text-slate-600">
@@ -388,6 +674,7 @@ function DoctorDashboard() {
             </div>
 
             <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-blue-100/60" />
+
             <div className="absolute -bottom-20 right-24 h-48 w-48 rounded-full bg-cyan-100/50" />
 
           </section>
@@ -434,7 +721,9 @@ function DoctorDashboard() {
 
           <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_370px]">
 
-            {/* LEFT */}
+            {/* =================================================
+                LEFT
+            ================================================== */}
 
             <div className="space-y-5">
 
@@ -443,7 +732,11 @@ function DoctorDashboard() {
               <DashboardCard
                 title="Today's Appointments"
                 action="View All"
-                onAction={() => navigate("/doctor/appointments")}
+                onAction={() =>
+                  navigate(
+                    "/doctor/appointments"
+                  )
+                }
               >
 
                 <div className="overflow-x-auto">
@@ -483,6 +776,7 @@ function DoctorDashboard() {
                     </thead>
 
                     <tbody>
+
                       {loading ? (
                         <tr>
                           <td
@@ -501,43 +795,85 @@ function DoctorDashboard() {
                             No appointments for today.
                           </td>
                         </tr>
-                      ) : (
-                        filteredAppointments.slice(0, 5).map((appointment) => (
-                          <tr
-                            key={appointment.appointmentId}
-                            className="border-t border-slate-100"
+                      ) : filteredAppointments.length ===
+                        0 ? (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="py-12 text-center text-sm text-slate-400"
                           >
-                            <td className="px-4 py-4 text-sm font-medium">
-                              {appointment.appointmentTime || "—"}
-                            </td>
-                            <td className="px-4 py-4 text-sm font-medium">
-                              {appointment.patientName || "—"}
-                            </td>
-                            <td className="px-4 py-4 text-sm text-slate-600">
-                              {appointment.age ?? "—"} / {appointment.gender || "—"}
-                            </td>
-                            <td className="px-4 py-4 text-sm text-slate-600">
-                              {appointment.reason || "—"}
-                            </td>
-                            <td className="px-4 py-4 text-sm">
-                              {appointment.status || "—"}
-                            </td>
-                            <td className="px-4 py-4">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  navigate(
-                                    `/doctor/appointments/${appointment.appointmentId}/patient`
-                                  )
+                            No matching appointments.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredAppointments
+                          .slice(0, 5)
+                          .map(
+                            (appointment) => (
+                              <tr
+                                key={
+                                  appointment.appointmentId
                                 }
-                                className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-100"
+                                className="border-t border-slate-100"
                               >
-                                View
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+
+                                <td className="px-4 py-4 text-sm font-medium">
+                                  {appointment.appointmentTime ||
+                                    "—"}
+                                </td>
+
+                                <td className="px-4 py-4 text-sm font-medium">
+                                  {appointment.patientName ||
+                                    "—"}
+                                </td>
+
+                                <td className="px-4 py-4 text-sm text-slate-600">
+                                  {appointment.age ??
+                                    "—"}{" "}
+                                  /{" "}
+                                  {appointment.gender ||
+                                    "—"}
+                                </td>
+
+                                <td className="px-4 py-4 text-sm text-slate-600">
+                                  {appointment.reason ||
+                                    "—"}
+                                </td>
+
+                                <td className="px-4 py-4 text-sm">
+                                  {appointment.status ||
+                                    "—"}
+                                </td>
+
+                                <td className="px-4 py-4">
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const patientId =
+                                        appointment.patientId;
+
+                                      if (
+                                        patientId !=
+                                        null
+                                      ) {
+                                        navigate(
+                                          `/doctor/patients/${patientId}/history`
+                                        );
+                                      }
+                                    }}
+                                    className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
+                                  >
+                                    View
+                                  </button>
+
+                                </td>
+
+                              </tr>
+                            )
+                          )
                       )}
+
                     </tbody>
 
                   </table>
@@ -546,7 +882,9 @@ function DoctorDashboard() {
 
               </DashboardCard>
 
-              {/* Bottom Cards */}
+              {/* =================================================
+                  BOTTOM CARDS
+              ================================================== */}
 
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
 
@@ -556,12 +894,17 @@ function DoctorDashboard() {
                 >
 
                   <div className="py-4">
+
                     <p className="text-3xl font-bold text-slate-900">
-                      {completedAppointments.length}
+                      {
+                        completedAppointments.length
+                      }
                     </p>
+
                     <p className="mt-1 text-sm text-slate-500">
                       Completed appointments
                     </p>
+
                   </div>
 
                 </DashboardCard>
@@ -572,12 +915,15 @@ function DoctorDashboard() {
                 >
 
                   <div className="py-4">
+
                     <p className="text-3xl font-bold text-slate-900">
                       {imagingOrders.length}
                     </p>
+
                     <p className="mt-1 text-sm text-slate-500">
                       Imaging orders
                     </p>
+
                   </div>
 
                 </DashboardCard>
@@ -586,111 +932,252 @@ function DoctorDashboard() {
 
             </div>
 
-            {/* RIGHT */}
+            {/* =================================================
+                RIGHT
+            ================================================== */}
 
             <div className="space-y-5">
 
-              {/* Schedule */}
+              {/* =================================================
+                  SCHEDULE
+              ================================================== */}
 
               <div id="doctor-schedule">
-                <DashboardCard title="My Schedule">
 
-                <div className="mb-4 flex items-center justify-between">
+                <DashboardCard
+                  title="My Schedule"
+                >
 
-                  <button type="button" onClick={() => { const d = new Date(`${scheduleDate}T12:00:00`);
-                    d.setDate(d.getDate() - 1);
-                    setScheduleDate(formatLocalDate(d)); }} className="rounded-lg p-2 hover:bg-slate-100">
-                    <ChevronLeft size={18} />
-                  </button>
+                  <div className="mb-4 flex items-center justify-between">
 
-                  <p className="font-semibold text-slate-800 text-center">
-                    {scheduleDate === today
-                      ? "Today"
-                      : new Date(`${scheduleDate}T12:00:00`).toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                  </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const date =
+                          new Date(
+                            `${scheduleDate}T12:00:00`
+                          );
 
-                  <button type="button" onClick={() => { const d = new Date(`${scheduleDate}T12:00:00`);
-                    d.setDate(d.getDate() + 1);
-                    setScheduleDate(formatLocalDate(d)); }} className="rounded-lg p-2 hover:bg-slate-100">
-                    <ChevronRight size={18} />
-                  </button>
+                        date.setDate(
+                          date.getDate() - 1
+                        );
 
-                </div>
+                        setScheduleDate(
+                          formatLocalDate(
+                            date
+                          )
+                        );
+                      }}
+                      className="rounded-lg p-2 transition hover:bg-slate-100"
+                    >
+                      <ChevronLeft
+                        size={18}
+                      />
+                    </button>
 
-                <div className="mb-3">
-                  <input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-                </div>
+                    <p className="text-center font-semibold text-slate-800">
 
-                <div className="rounded-xl border border-slate-100 p-4">
-                  <div className="mt-4 space-y-2">
-                    {appointments.length === 0 ? (
-                      <p className="py-4 text-center text-sm text-slate-400">
-                        No appointments scheduled for this date.
-                      </p>
-                    ) : (
-                      appointments.slice(0, 4).map((appointment) => (
-                        <div
-                          key={appointment.appointmentId}
-                          className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
-                        >
-                          <span className="text-sm font-medium text-slate-700">
-                            {appointment.appointmentTime || "—"}
-                          </span>
-                          <span className="max-w-[150px] truncate text-sm text-slate-500">
-                            {appointment.patientName || "—"}
-                          </span>
-                        </div>
-                      ))
-                    )}
+                      {scheduleDate === today
+                        ? "Today"
+                        : new Date(
+                            `${scheduleDate}T12:00:00`
+                          ).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday:
+                                "short",
+                              month:
+                                "short",
+                              day: "numeric",
+                            }
+                          )}
+
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const date =
+                          new Date(
+                            `${scheduleDate}T12:00:00`
+                          );
+
+                        date.setDate(
+                          date.getDate() + 1
+                        );
+
+                        setScheduleDate(
+                          formatLocalDate(
+                            date
+                          )
+                        );
+                      }}
+                      className="rounded-lg p-2 transition hover:bg-slate-100"
+                    >
+                      <ChevronRight
+                        size={18}
+                      />
+                    </button>
+
                   </div>
-                </div>
 
-              </DashboardCard>
+                  <div className="mb-3">
+
+                    <input
+                      type="date"
+                      value={scheduleDate}
+                      onChange={(event) =>
+                        setScheduleDate(
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                    />
+
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 p-4">
+
+                    <div className="mt-4 space-y-2">
+
+                      {appointments.length ===
+                      0 ? (
+                        <p className="py-4 text-center text-sm text-slate-400">
+                          No appointments scheduled for this date.
+                        </p>
+                      ) : (
+                        appointments
+                          .slice(0, 4)
+                          .map(
+                            (
+                              appointment
+                            ) => (
+                              <div
+                                key={
+                                  appointment.appointmentId
+                                }
+                                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
+                              >
+
+                                <span className="text-sm font-medium text-slate-700">
+                                  {appointment.appointmentTime ||
+                                    "—"}
+                                </span>
+
+                                <span className="max-w-[150px] truncate text-sm text-slate-500">
+                                  {appointment.patientName ||
+                                    "—"}
+                                </span>
+
+                              </div>
+                            )
+                          )
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </DashboardCard>
 
               </div>
 
-              {/* Recent Patients */}
+              {/* =================================================
+                  RECENT PATIENTS
+              ================================================== */}
 
               <DashboardCard
                 title="Recent Patients"
                 action="View All"
+                onAction={() =>
+                  navigate(
+                    "/doctor/patients"
+                  )
+                }
               >
 
                 {loading ? (
                   <p className="py-8 text-center text-sm text-slate-400">
                     Loading patients...
                   </p>
-                ) : sharedPatients.length === 0 ? (
+                ) : sharedPatients.length ===
+                  0 ? (
                   <EmptyState
-                    icon={<Users size={25} />}
+                    icon={
+                      <Users size={25} />
+                    }
                     text="No patients available."
                   />
                 ) : (
                   <div className="space-y-3">
-                    {sharedPatients.slice(0, 5).map((patient, index) => (
-                      <div
-                        key={patient.id ?? patient.patientId ?? index}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                            <UserRound size={17} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-slate-800">
-                              {patient.name || patient.patientName || "—"}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {patient.id ?? patient.patientId ?? "—"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+
+                    {sharedPatients
+                      .slice(0, 5)
+                      .map(
+                        (
+                          patient,
+                          index
+                        ) => {
+
+                          const patientId =
+                            patient.patientId ??
+                            patient.id;
+
+                          const patientName =
+                            patient.patientName ??
+                            patient.name ??
+                            "—";
+
+                          return (
+                            <button
+                              type="button"
+                              key={
+                                patientId ??
+                                index
+                              }
+                              onClick={() => {
+                                if (
+                                  patientId !=
+                                  null
+                                ) {
+                                  navigate(
+                                    `/doctor/patients/${patientId}/history`
+                                  );
+                                }
+                              }}
+                              className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-left transition hover:bg-blue-50"
+                            >
+
+                              <div className="flex items-center gap-3">
+
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                  <UserRound
+                                    size={17}
+                                  />
+                                </div>
+
+                                <div>
+
+                                  <p className="text-sm font-semibold text-slate-800">
+                                    {
+                                      patientName
+                                    }
+                                  </p>
+
+                                  <p className="text-xs text-slate-400">
+                                    {patientId ??
+                                      "—"}
+                                  </p>
+
+                                </div>
+
+                              </div>
+
+                            </button>
+                          );
+                        }
+                      )}
+
                   </div>
                 )}
 
@@ -729,7 +1216,11 @@ function SidebarItem({
       }`}
     >
       {icon}
-      <span>{label}</span>
+
+      <span>
+        {label}
+      </span>
+
     </button>
   );
 }
@@ -831,6 +1322,6 @@ function EmptyState({
 
     </div>
   );
-} 
+}
 
 export default DoctorDashboard;
