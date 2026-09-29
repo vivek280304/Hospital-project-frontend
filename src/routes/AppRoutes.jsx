@@ -1,35 +1,66 @@
 import { Routes, Route } from "react-router-dom";
 
-// Public
+// =========================
+// PUBLIC
+// =========================
 import Home from "../pages/public/Home";
 import DoctorDetails from "../pages/public/DoctorDetails";
 import DoctorSlots from "../pages/public/DoctorSlots";
 
-// Patient Auth
+// =========================
+// PATIENT AUTH
+// =========================
 import PatientLogin from "../pages/auth/patient/PatientLogin";
 import PatientRegister from "../pages/auth/patient/PatientRegister";
 import PatientVerifyOtp from "../pages/auth/patient/PatientVerifyOtp";
 import PatientForgotPassword from "../pages/auth/patient/PatientForgotPassword";
 import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
 
-// Patient
+// =========================
+// PATIENT
+// =========================
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
 
-// Doctor Auth
+// =========================
+// DOCTOR AUTH
+// =========================
 import DoctorLogin from "../pages/doctor/DoctorLogin";
 
-// Doctor
+// =========================
+// DOCTOR
+// =========================
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorPatients from "../pages/doctor/DoctorPatients";
 import PatientHistory from "../pages/doctor/PatientHistory";
 import DoctorProfile from "../pages/doctor/DoctorProfile";
 import MedicalReport from "../pages/doctor/MedicalReport";
+import DoctorChangePassword from "../pages/doctor/DoctorChangePassword";
+
+// =========================
+// RECEPTIONIST AUTH
+// =========================
+import ReceptionistLogin from "../pages/receptionist/ReceptionistLogin";
+
+// =========================
+// RECEPTIONIST
+// =========================
+
+import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
+import ReceptionistPatients from "../pages/receptionist/ReceptionistPatients";
+import ReceptionistPatientDetails from "../pages/receptionist/ReceptionistPatientDetails";
+import ReceptionistAddPatient from "../pages/receptionist/ReceptionistAddPatient";
+import ReceptionistAppointments from "../pages/receptionist/ReceptionistAppointments";
+import ReceptionistBookAppointment from "../pages/receptionist/ReceptionistBookAppointment";
+import ReceptionistDoctorSlots from "../pages/receptionist/ReceptionistDoctorSlots";
+import ReceptionistProfile from "../pages/receptionist/ReceptionistProfile";
+import ReceptionistChangePassword from "../pages/receptionist/ReceptionistChangePassword";
 
 function AppRoutes() {
   return (
     <Routes>
+
       {/* =========================
           PUBLIC
       ========================== */}
@@ -48,6 +79,7 @@ function AppRoutes() {
         path="/doctors/:doctorId/slots"
         element={<DoctorSlots />}
       />
+
 
       {/* =========================
           PATIENT AUTH
@@ -78,6 +110,7 @@ function AppRoutes() {
         element={<PatientResetPassword />}
       />
 
+
       {/* =========================
           PATIENT
       ========================== */}
@@ -92,6 +125,7 @@ function AppRoutes() {
         element={<BookAppointment />}
       />
 
+
       {/* =========================
           DOCTOR AUTH
       ========================== */}
@@ -100,6 +134,7 @@ function AppRoutes() {
         path="/doctor/login"
         element={<DoctorLogin />}
       />
+
 
       {/* =========================
           DOCTOR DASHBOARD
@@ -110,6 +145,7 @@ function AppRoutes() {
         element={<DoctorDashboard />}
       />
 
+
       {/* =========================
           DOCTOR APPOINTMENTS
       ========================== */}
@@ -118,6 +154,7 @@ function AppRoutes() {
         path="/doctor/appointments"
         element={<DoctorAppointments />}
       />
+
 
       {/* =========================
           DOCTOR REPORT
@@ -128,6 +165,7 @@ function AppRoutes() {
         element={<MedicalReport />}
       />
 
+
       {/* =========================
           DOCTOR PATIENTS
       ========================== */}
@@ -136,6 +174,7 @@ function AppRoutes() {
         path="/doctor/patients"
         element={<DoctorPatients />}
       />
+
 
       {/* =========================
           PATIENT HISTORY
@@ -146,6 +185,7 @@ function AppRoutes() {
         element={<PatientHistory />}
       />
 
+
       {/* =========================
           DOCTOR PROFILE
       ========================== */}
@@ -154,6 +194,68 @@ function AppRoutes() {
         path="/doctor/profile"
         element={<DoctorProfile />}
       />
+
+      <Route
+        path="/doctor/change-password"
+        element={<DoctorChangePassword />}
+      />
+
+
+      {/* =========================
+          RECEPTIONIST 
+      ========================== */}
+
+      <Route
+        path="/receptionist/login"
+        element={<ReceptionistLogin />}
+      />
+
+      <Route
+        path="/receptionist/dashboard"
+        element={<ReceptionistDashboard />}
+      />
+
+      <Route
+        path="/receptionist/patients"
+        element={<ReceptionistPatients />}
+      />
+
+      <Route
+        path="/receptionist/patients/:patientId"
+        element={<ReceptionistPatientDetails />}
+      />
+
+      <Route
+        path="/receptionist/patients/add"
+        element={<ReceptionistAddPatient />}
+      />
+
+      <Route
+        path="/receptionist/appointments"
+        element={<ReceptionistAppointments />}
+      />
+
+      <Route
+        path="/receptionist/appointments/book"
+        element={<ReceptionistBookAppointment />}
+      />
+
+      <Route
+        path="/receptionist/doctor-slots"
+        element={<ReceptionistDoctorSlots />}
+      />
+
+      <Route
+        path="/receptionist/profile"
+        element={<ReceptionistProfile />}
+      />
+
+      <Route
+        path="/receptionist/change-password"
+        element={<ReceptionistChangePassword />}
+      />
+      
+
     </Routes>
   );
 }

@@ -9,6 +9,22 @@ const doctorService = {
     return response.data;
   },
 
+    getDoctors: async (specialization = "") => {
+    let response;
+
+    if (specialization.trim()) {
+      response = await api.get("/doctors", {
+        params: {
+          specialization: specialization.trim(),
+        },
+      });
+    } else {
+      response = await api.get("/doctors/all");
+    }
+
+    return response.data;
+  },
+
   // =========================
   // APPOINTMENTS
   // =========================
@@ -39,6 +55,8 @@ const doctorService = {
 
     return response.data;
   },
+
+ 
 
   // =========================
   // PATIENTS
@@ -99,14 +117,7 @@ const doctorService = {
     return response.data;
   },
 
-  createMedicalReport: async (appointmentId, data) => {
-  const response = await api.post(
-    `/doctor/appointments/${appointmentId}/report`,
-    data
-  );
-
-  return response.data;
-},
+ 
 
 };
 

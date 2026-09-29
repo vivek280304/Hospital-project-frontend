@@ -752,7 +752,7 @@ function DashboardHome({
                   <div className="min-w-0 flex-1">
 
                     <p className="font-semibold text-slate-800">
-                      Dr.{" "}
+                      {" "}
                       {appointment.doctorName}
                     </p>
 

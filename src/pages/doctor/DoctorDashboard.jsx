@@ -357,7 +357,7 @@ function DoctorDashboard() {
     localStorage.clear();
     sessionStorage.clear();
 
-    navigate("/", {
+    navigate("/doctor/login", {
       replace: true,
     });
   };
@@ -496,6 +496,7 @@ function DoctorDashboard() {
           <SidebarItem
             icon={<FileText size={20} />}
             label="Medical Reports"
+            onClick={() => navigate("/doctor/appointments")}
           />
 
           <SidebarItem
@@ -525,10 +526,13 @@ function DoctorDashboard() {
             }
           />
 
-          <SidebarItem
-            icon={<Settings size={20} />}
-            label="Change Password"
-          />
+         <SidebarItem
+  icon={<Settings size={20} />}
+  label="Change Password"
+  onClick={() =>
+    navigate("/doctor/change-password")
+  }
+/>
 
         </nav>
 
@@ -891,21 +895,64 @@ function DoctorDashboard() {
                 <DashboardCard
                   title="Recent Medical Reports"
                   action="View All"
+                  onAction={() =>
+                    navigate("/doctor/appointments")
+                  }
                 >
 
-                  <div className="py-4">
+                  {completedAppointments.length === 0 ? (
+                    <EmptyState
+                      icon={<FileText size={25} />}
+                      text="No completed appointments yet."
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      {completedAppointments
+                        .slice(0, 3)
+                        .map((appointment) => (
+                          <div
+                            key={appointment.appointmentId}
+                            className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-800">
+                                {appointment.patientName || "Patient"}
+                              </p>
 
-                    <p className="text-3xl font-bold text-slate-900">
-                      {
-                        completedAppointments.length
-                      }
-                    </p>
+                              <p className="mt-1 text-xs text-slate-500">
+                                {appointment.appointmentDate || today}
+                                {appointment.appointmentTime
+                                  ? ` · ${appointment.appointmentTime}`
+                                  : ""}
+                              </p>
+                            </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Completed appointments
-                    </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const patientId =
+                                  appointment.patientId;
 
-                  </div>
+                                if (patientId != null) {
+                                  navigate(
+                                    `/doctor/appointments/${appointment.appointmentId}/report`,
+                                    {
+                                      state: {
+                                        patientId,
+                                        appointment,
+                                      },
+                                    }
+                                  );
+                                }
+                              }}
+                              className="shrink-0 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
+                            >
+                              View Report
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
 
                 </DashboardCard>
 
@@ -1082,106 +1129,7 @@ function DoctorDashboard() {
 
               </div>
 
-              {/* =================================================
-                  RECENT PATIENTS
-              ================================================== */}
 
-              <DashboardCard
-                title="Recent Patients"
-                action="View All"
-                onAction={() =>
-                  navigate(
-                    "/doctor/patients"
-                  )
-                }
-              >
-
-                {loading ? (
-                  <p className="py-8 text-center text-sm text-slate-400">
-                    Loading patients...
-                  </p>
-                ) : sharedPatients.length ===
-                  0 ? (
-                  <EmptyState
-                    icon={
-                      <Users size={25} />
-                    }
-                    text="No patients available."
-                  />
-                ) : (
-                  <div className="space-y-3">
-
-                    {sharedPatients
-                      .slice(0, 5)
-                      .map(
-                        (
-                          patient,
-                          index
-                        ) => {
-
-                          const patientId =
-                            patient.patientId ??
-                            patient.id;
-
-                          const patientName =
-                            patient.patientName ??
-                            patient.name ??
-                            "—";
-
-                          return (
-                            <button
-                              type="button"
-                              key={
-                                patientId ??
-                                index
-                              }
-                              onClick={() => {
-                                if (
-                                  patientId !=
-                                  null
-                                ) {
-                                  navigate(
-                                    `/doctor/patients/${patientId}/history`
-                                  );
-                                }
-                              }}
-                              className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-left transition hover:bg-blue-50"
-                            >
-
-                              <div className="flex items-center gap-3">
-
-                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                  <UserRound
-                                    size={17}
-                                  />
-                                </div>
-
-                                <div>
-
-                                  <p className="text-sm font-semibold text-slate-800">
-                                    {
-                                      patientName
-                                    }
-                                  </p>
-
-                                  <p className="text-xs text-slate-400">
-                                    {patientId ??
-                                      "—"}
-                                  </p>
-
-                                </div>
-
-                              </div>
-
-                            </button>
-                          );
-                        }
-                      )}
-
-                  </div>
-                )}
-
-              </DashboardCard>
 
             </div>
 
