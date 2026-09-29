@@ -107,9 +107,6 @@ function DoctorSlots() {
 
   /*
    * Check whether the patient is already logged in.
-   *
-   * Different versions of the auth code may use different
-   * localStorage names, so we check the common ones.
    */
   const isPatientLoggedIn = () => {
     const tokenKeys = [
@@ -123,7 +120,11 @@ function DoctorSlots() {
     for (const key of tokenKeys) {
       const token = localStorage.getItem(key);
 
-      if (token && token !== "null" && token !== "undefined") {
+      if (
+        token &&
+        token !== "null" &&
+        token !== "undefined"
+      ) {
         return true;
       }
     }
@@ -163,7 +164,10 @@ function DoctorSlots() {
       appointmentTime: time,
     };
 
-    console.log("Selected appointment:", appointmentData);
+    console.log(
+      "Selected appointment:",
+      appointmentData
+    );
 
     const loggedIn = isPatientLoggedIn();
 
@@ -227,7 +231,18 @@ function DoctorSlots() {
     doctor.department ??
     "General Medicine";
 
-  const today = new Date()
+  /*
+   * IMPORTANT:
+   * Patient can only book from tomorrow onwards.
+   *
+   * Example:
+   * Today = 30 September
+   * Minimum booking date = 1 October
+   */
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const minBookingDate = tomorrow
     .toISOString()
     .split("T")[0];
 
@@ -289,6 +304,7 @@ function DoctorSlots() {
           <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-sm">
 
             <div className="flex items-center gap-3">
+
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <CalendarDays size={22} />
               </div>
@@ -302,11 +318,12 @@ function DoctorSlots() {
                   Choose your appointment date
                 </p>
               </div>
+
             </div>
 
             <input
               type="date"
-              min={today}
+              min={minBookingDate}
               value={date}
               onChange={(e) =>
                 loadSlots(e.target.value)
@@ -314,12 +331,17 @@ function DoctorSlots() {
               className="mt-6 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
 
+            <p className="mt-2 text-xs text-slate-400">
+              Appointments are available from tomorrow onwards.
+            </p>
+
           </div>
 
           {/* SLOTS */}
           <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-sm">
 
             <div className="flex items-center gap-3">
+
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <Clock size={22} />
               </div>
@@ -335,11 +357,13 @@ function DoctorSlots() {
                     : "Select a date first"}
                 </p>
               </div>
+
             </div>
 
             {/* NO DATE */}
             {!date && (
               <div className="mt-10 text-center">
+
                 <CalendarDays
                   size={40}
                   className="mx-auto text-slate-300"
@@ -348,6 +372,7 @@ function DoctorSlots() {
                 <p className="mt-3 text-sm text-slate-500">
                   Select a date to see available slots.
                 </p>
+
               </div>
             )}
 
@@ -410,6 +435,7 @@ function DoctorSlots() {
               )}
 
           </div>
+
         </section>
 
       </main>
