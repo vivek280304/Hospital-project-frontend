@@ -9,6 +9,11 @@ const doctorService = {
     return response.data;
   },
 
+  getDoctorById: async (doctorId) => {
+  const response = await api.get(`/doctors/${doctorId}`);
+  return response.data;
+},
+
     getDoctors: async (specialization = "") => {
     let response;
 
@@ -24,6 +29,20 @@ const doctorService = {
 
     return response.data;
   },
+
+    getAvailableSlots: async (doctorId, date) => {
+    const response = await api.get(
+      `/doctors/${doctorId}/available-slots`,
+      {
+        params: {
+          date,
+        },
+      }
+    );
+
+    return response.data;
+  },
+
 
   // =========================
   // APPOINTMENTS
