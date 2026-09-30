@@ -57,6 +57,21 @@ import ReceptionistDoctorSlots from "../pages/receptionist/ReceptionistDoctorSlo
 import ReceptionistProfile from "../pages/receptionist/ReceptionistProfile";
 import ReceptionistChangePassword from "../pages/receptionist/ReceptionistChangePassword";
 
+// =========================
+// ADMIN LOGIN
+// =========================
+
+import AdminLogin from "../pages/admin/AdminLogin";
+import AdminLayout from "../components/admin/AdminLayout";
+
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminUsers from "../pages/admin/AdminUsers";
+import AdminCreateUser from "../pages/admin/AdminCreateUser";
+import AdminSchedules from "../pages/admin/AdminSchedules";
+import AdminProfile from "../pages/admin/AdminProfile";
+import AdminChangePassword from "../pages/admin/AdminChangePassword";
+
+
 function AppRoutes() {
   return (
     <Routes>
@@ -255,7 +270,73 @@ function AppRoutes() {
         element={<ReceptionistChangePassword />}
       />
       
+      {/* =========================
+          ADMIN 
+      ========================== */}
 
+
+   {/* =========================
+    ADMIN
+========================== */}
+
+<Route
+  path="/admin/login"
+  element={<AdminLogin />}
+/>
+
+<Route
+  path="/admin/dashboard"
+  element={
+    <AdminLayout>
+      <AdminDashboard />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/admin/users"
+  element={
+    <AdminLayout>
+      <AdminUsers />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/admin/users/create"
+  element={
+    <AdminLayout>
+      <AdminCreateUser />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/admin/schedules"
+  element={
+    <AdminLayout>
+      <AdminSchedules />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/admin/profile"
+  element={
+    <AdminLayout>
+      <AdminProfile />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/admin/change-password"
+  element={
+    <AdminLayout>
+      <AdminChangePassword />
+    </AdminLayout>
+  }
+/>
     </Routes>
   );
 }
