@@ -23,28 +23,31 @@ function PatientRegister() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      await authService.register(form);
+    await authService.register(form);
 
-      navigate("/patient/verify-registration", {
-        state: {
-          email: form.email,
-        },
-      });
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Registration failed. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    navigate("/patient/verify-otp", {
+      state: {
+        email: form.email,
+      },
+    });
+  } catch (error) {
+    console.error("PATIENT REGISTRATION ERROR:", error);
+
+    setError(
+      error.response?.data?.message ||
+        error.response?.data ||
+        "Registration failed. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-100">

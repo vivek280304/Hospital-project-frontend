@@ -25,6 +25,12 @@ function BookAppointment() {
   const [profile, setProfile] = useState(null);
 
   const [reason, setReason] = useState("");
+  const [patientDetails, setPatientDetails] = useState({
+  dateOfBirth: "",
+  gender: "",
+  phoneNumber: "",
+});
+
 
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
@@ -56,7 +62,13 @@ function BookAppointment() {
         ]);
 
       setDoctor(doctorData);
-      setProfile(profileData);
+setProfile(profileData);
+
+setPatientDetails({
+  dateOfBirth: profileData?.dateOfBirth || "",
+  gender: profileData?.gender || "",
+  phoneNumber: profileData?.phoneNumber || "",
+});
     } catch (error) {
       console.error("Booking data error:", error);
 
@@ -70,6 +82,19 @@ function BookAppointment() {
     }
   };
 
+  const handlePatientDetailsChange = (e) => {
+  const { name, value } = e.target;
+
+  setPatientDetails((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+
+  setError("");
+  setSuccess("");
+};
+
+
   const handleBooking = async (e) => {
     e.preventDefault();
 
@@ -79,6 +104,20 @@ function BookAppointment() {
       setError("Patient profile could not be loaded.");
       return;
     }
+    if (!patientDetails.dateOfBirth) {
+  setError("Date of birth is required.");
+  return;
+}
+
+if (!patientDetails.gender) {
+  setError("Please select your gender.");
+  return;
+}
+
+if (!patientDetails.phoneNumber.trim()) {
+  setError("Phone number is required.");
+  return;
+}
 
     try {
       setBooking(true);
@@ -87,18 +126,16 @@ function BookAppointment() {
       setSuccess("");
 
       const request = {
-        dateOfBirth: profile.dateOfBirth,
-        gender: profile.gender,
-        phoneNumber: profile.phoneNumber,
+  dateOfBirth: patientDetails.dateOfBirth,
+  gender: patientDetails.gender,
+  phoneNumber: patientDetails.phoneNumber.trim(),
 
-        doctorId: Number(appointmentData.doctorId),
-        appointmentDate:
-          appointmentData.appointmentDate,
-        appointmentTime:
-          appointmentData.appointmentTime,
+  doctorId: Number(appointmentData.doctorId),
+  appointmentDate: appointmentData.appointmentDate,
+  appointmentTime: appointmentData.appointmentTime,
 
-        reason: reason.trim() || null,
-      };
+  reason: reason.trim() || null,
+};
 
       console.log("Booking request:", request);
 
@@ -442,67 +479,104 @@ function BookAppointment() {
 
             </div>
 
-            {/* PATIENT DETAILS */}
-            <div className="mt-7">
-              <h2 className="text-lg font-bold text-[#10255c]">
-                Patient Details
-              </h2>
+          {/* PATIENT DETAILS */}
+<div className="mt-7">
+  <h2 className="text-lg font-bold text-[#10255c]">
+    Patient Details
+  </h2>
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+  <p className="mt-1 text-sm text-slate-500">
+    Please provide your details before booking the appointment.
+  </p>
 
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Name
-                  </p>
+  <div className="mt-4 grid gap-5 sm:grid-cols-2">
 
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {profile.name}
-                  </p>
-                </div>
+    {/* Name */}
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        Full Name
+      </label>
 
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Email
-                  </p>
+      <input
+        type="text"
+        value={profile.name || ""}
+        disabled
+        className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600"
+      />
+    </div>
 
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {profile.email}
-                  </p>
-                </div>
+    {/* Email */}
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        Email
+      </label>
 
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Date of Birth
-                  </p>
+      <input
+        type="email"
+        value={profile.email || ""}
+        disabled
+        className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600"
+      />
+    </div>
 
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {profile.dateOfBirth || "Not provided"}
-                  </p>
-                </div>
+    {/* Date of Birth */}
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        Date of Birth
+        <span className="ml-1 text-red-500">*</span>
+      </label>
 
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Gender
-                  </p>
+      <input
+        type="date"
+        name="dateOfBirth"
+        value={patientDetails.dateOfBirth}
+        onChange={handlePatientDetailsChange}
+        required
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
 
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {profile.gender || "Not provided"}
-                  </p>
-                </div>
+    {/* Gender */}
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        Gender
+        <span className="ml-1 text-red-500">*</span>
+      </label>
 
-                <div>
-                  <p className="text-xs text-slate-500">
-                    Phone
-                  </p>
+      <select
+        name="gender"
+        value={patientDetails.gender}
+        onChange={handlePatientDetailsChange}
+        required
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      >
+        <option value="">Select gender</option>
+        <option value="MALE">Male</option>
+        <option value="FEMALE">Female</option>
+        <option value="OTHER">Other</option>
+      </select>
+    </div>
 
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {profile.phoneNumber || "Not provided"}
-                  </p>
-                </div>
+    {/* Phone */}
+    <div className="sm:col-span-2">
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        Phone Number
+        <span className="ml-1 text-red-500">*</span>
+      </label>
 
-              </div>
-            </div>
+      <input
+        type="tel"
+        name="phoneNumber"
+        value={patientDetails.phoneNumber}
+        onChange={handlePatientDetailsChange}
+        placeholder="Enter your phone number"
+        required
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
 
+  </div>
+</div>
             {/* REASON */}
             <div className="mt-7">
               <label className="text-sm font-semibold text-slate-700">

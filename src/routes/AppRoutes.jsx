@@ -270,9 +270,7 @@ function AppRoutes() {
         element={<ReceptionistChangePassword />}
       />
       
-      {/* =========================
-          ADMIN 
-      ========================== */}
+      
 
 
    {/* =========================
