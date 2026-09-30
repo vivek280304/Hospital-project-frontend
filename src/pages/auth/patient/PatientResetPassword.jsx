@@ -1,51 +1,73 @@
 import { useState } from "react";
-import { Lock, HeartPulse } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Lock, Eye, EyeOff, KeyRound } from "lucide-react";
 import authService from "../../../services/authService";
 
-function PatientResetPassword() {
-  const location = useLocation();
+export default function PatientResetPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [form, setForm] = useState({
-    email: location.state?.email || "",
-    otp: "",
-    newPassword: "",
-  });
+  const email = location.state?.email || "";
+
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
+
+    if (!email) {
+      setError("Email is missing. Please start the reset process again.");
+      return;
+    }
+
+    if (!otp.trim()) {
+      setError("Please enter the OTP.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     try {
       setLoading(true);
-      setError("");
-      setMessage("");
 
-      await authService.resetPassword(form);
+      await authService.resetPassword({
+        email,
+        otp: otp.trim(),
+        newPassword,
+      });
 
-      setMessage(
-        "Password reset successfully. Redirecting to login..."
-      );
+      setSuccess("Password reset successfully.");
 
       setTimeout(() => {
         navigate("/patient/login");
       }, 1500);
 
-    } catch (error) {
+    } catch (err) {
+      console.error("Reset password error:", err);
+
       setError(
-        error.response?.data?.message ||
-          "Unable to reset password."
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Unable to reset password."
       );
     } finally {
       setLoading(false);
@@ -53,120 +75,157 @@ function PatientResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
 
       <div className="w-full max-w-md">
 
-        <div className="mb-8 text-center">
-
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white">
-            <HeartPulse size={30} />
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white mb-4">
+            <Lock size={28} />
           </div>
 
           <h1 className="text-3xl font-bold text-slate-900">
             Reset Password
           </h1>
 
-          <p className="mt-2 text-slate-500">
-            Create a new secure password.
+          <p className="text-slate-500 mt-2">
+            Create a new password for your MediCare account
           </p>
-
         </div>
 
-        <div className="rounded-3xl bg-white p-8 shadow-xl">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
+
+          {email && (
+            <div className="mb-5 rounded-lg bg-blue-50 border border-blue-100 px-4 py-3">
+              <p className="text-sm text-slate-600">
+                Resetting password for
+              </p>
+
+              <p className="font-semibold text-blue-700 break-all">
+                {email}
+              </p>
+            </div>
+          )}
 
           {error && (
-            <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="mb-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
-          {message && (
-            <div className="mb-5 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-600">
-              {message}
+          {success && (
+            <div className="mb-5 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+              {success}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
+            {/* OTP */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Email
-              </label>
-
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 OTP
               </label>
 
-              <input
-                type="text"
-                name="otp"
-                maxLength={6}
-                inputMode="numeric"
-                value={form.otp}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    otp: e.target.value.replace(/\D/g, ""),
-                  })
-                }
-                placeholder="Enter OTP"
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-xl tracking-[0.5em] outline-none focus:border-blue-500"
-              />
+              <div className="relative">
+                <KeyRound
+                  size={19}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  maxLength={6}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
             </div>
 
+            {/* New Password */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 New Password
               </label>
 
               <div className="relative">
                 <Lock
                   size={19}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <input
-                  type="password"
-                  name="newPassword"
-                  value={form.newPassword}
-                  onChange={handleChange}
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 outline-none focus:border-blue-500"
+                  className="w-full pl-10 pr-11 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                >
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Confirm Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={19}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                  className="w-full pl-10 pr-11 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={19} />
+                  ) : (
+                    <Eye size={19} />
+                  )}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-blue-600 py-3.5 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl transition"
             >
-              {loading
-                ? "Resetting..."
-                : "Reset Password"}
+              {loading ? "Resetting..." : "Reset Password"}
             </button>
 
           </form>
 
           <button
             onClick={() => navigate("/patient/login")}
-            className="mt-6 w-full text-sm font-medium text-slate-500 hover:text-blue-600"
+            className="w-full mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            ← Back to Login
+            Back to Login
           </button>
 
         </div>
@@ -174,5 +233,3 @@ function PatientResetPassword() {
     </div>
   );
 }
-
-export default PatientResetPassword;

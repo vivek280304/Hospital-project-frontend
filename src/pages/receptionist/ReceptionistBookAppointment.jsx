@@ -30,11 +30,20 @@ export default function ReceptionistBookAppointment() {
   // STATE
   // =====================================================
 
+  const normalizePatient = (patient) => {
+  if (!patient) return null;
+
+  return {
+    ...patient,
+    id: patient.id ?? patient.patientId,
+  };
+};
+
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
 
-  const [selectedPatient, setSelectedPatient] =
-    useState(() => location.state?.patient || null);
+ const [selectedPatient, setSelectedPatient] =
+  useState(() => normalizePatient(location.state?.patient));
 
   const [selectedDoctorId, setSelectedDoctorId] =
     useState(
@@ -89,6 +98,7 @@ export default function ReceptionistBookAppointment() {
   const [success, setSuccess] =
     useState("");
 
+    
   // =====================================================
   // LOAD DOCTORS
   // =====================================================
@@ -159,11 +169,11 @@ export default function ReceptionistBookAppointment() {
           query
         );
 
-      setPatients(
-        Array.isArray(data)
-          ? data
-          : []
-      );
+    setPatients(
+  Array.isArray(data)
+    ? data.map(normalizePatient)
+    : []
+);
     } catch (err) {
       console.error(
         "Patient search error:",
@@ -236,31 +246,31 @@ export default function ReceptionistBookAppointment() {
   // SELECT PATIENT
   // =====================================================
 
-  const handlePatientSelect = (
-    patient
-  ) => {
-    setSelectedPatient(patient);
+ const handlePatientSelect = (patient) => {
+  const normalizedPatient = normalizePatient(patient);
 
-    setPatientSearch(
-      patient.name || ""
-    );
+  setSelectedPatient(normalizedPatient);
 
-    setPatients([]);
+  setPatientSearch(
+    normalizedPatient.name || ""
+  );
 
-    setGender(
-      patient.gender || ""
-    );
+  setPatients([]);
 
-    setDateOfBirth(
-      patient.dateOfBirth || ""
-    );
+  setGender(
+    normalizedPatient.gender || ""
+  );
 
-    setPhoneNumber(
-      patient.phoneNumber || ""
-    );
+  setDateOfBirth(
+    normalizedPatient.dateOfBirth || ""
+  );
 
-    setError("");
-  };
+  setPhoneNumber(
+    normalizedPatient.phoneNumber || ""
+  );
+
+  setError("");
+};
 
   // =====================================================
   // SELECT DOCTOR
@@ -871,93 +881,93 @@ export default function ReceptionistBookAppointment() {
 
               {/* PATIENT INFORMATION */}
 
-              {selectedPatient && (
-                <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 lg:p-6">
+              {/* Patient Information */}
+<div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+  <div className="px-5 py-4 border-b border-slate-200">
+    <h2 className="text-lg font-semibold text-slate-900">
+      Patient Information
+    </h2>
+    <p className="text-sm text-slate-500 mt-1">
+      Verify information before booking
+    </p>
+  </div>
 
-                  <div className="flex items-center gap-3 mb-5">
+  <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                      <ClipboardList
-                        size={20}
-                      />
-                    </div>
+    {/* Name */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Full Name
+      </label>
 
-                    <div>
-                      <h3 className="font-bold">
-                        Patient Information
-                      </h3>
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.name || "Not available"}
+      </div>
+    </div>
 
-                      <p className="text-xs text-slate-400">
-                        Verify information before booking
-                      </p>
-                    </div>
+    {/* Email */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Email
+      </label>
 
-                  </div>
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.email || "Not available"}
+      </div>
+    </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
+    {/* Date of Birth */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Date of Birth
+      </label>
 
-                    <Field
-                      label="Date of Birth"
-                      type="date"
-                      value={
-                        dateOfBirth
-                      }
-                      onChange={(e) =>
-                        setDateOfBirth(
-                          e.target.value
-                        )
-                      }
-                    />
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.dateOfBirth
+          ? new Date(selectedPatient.dateOfBirth).toLocaleDateString("en-IN")
+          : "Not provided"}
+      </div>
+    </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-2">
-                        Gender
-                      </label>
+    {/* Gender */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Gender
+      </label>
 
-                      <select
-                        value={gender}
-                        onChange={(e) =>
-                          setGender(
-                            e.target.value
-                          )
-                        }
-                        className="w-full h-11 border border-slate-200 rounded-xl px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">
-                          Select Gender
-                        </option>
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.gender || "Not provided"}
+      </div>
+    </div>
 
-                        <option value="Male">
-                          Male
-                        </option>
+    {/* Phone */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Phone Number
+      </label>
 
-                        <option value="Female">
-                          Female
-                        </option>
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.phoneNumber || "Not provided"}
+      </div>
+    </div>
 
-                        <option value="Other">
-                          Other
-                        </option>
-                      </select>
-                    </div>
+    {/* Patient ID */}
+    <div>
+      <label className="block text-sm font-medium text-slate-600 mb-2">
+        Patient ID
+      </label>
 
-                    <Field
-                      label="Phone Number"
-                      value={
-                        phoneNumber
-                      }
-                      onChange={(e) =>
-                        setPhoneNumber(
-                          e.target.value
-                        )
-                      }
-                      placeholder="Phone number"
-                    />
+      <div className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900">
+        {selectedPatient?.id
+          ? `P-${String(selectedPatient.id).padStart(5, "0")}`
+          : "New Patient"}
+      </div>
+    </div>
 
-                  </div>
+  </div>
+</div>
 
-                </section>
-              )}
+                
 
               {/* STEP 2 */}
 
