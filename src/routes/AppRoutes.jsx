@@ -37,6 +37,7 @@ import PatientHistory from "../pages/doctor/PatientHistory";
 import DoctorProfile from "../pages/doctor/DoctorProfile";
 import MedicalReport from "../pages/doctor/MedicalReport";
 import DoctorChangePassword from "../pages/doctor/DoctorChangePassword";
+import DoctorSharePatient from "../pages/doctor/DoctorSharePatient";
 
 // =========================
 // RECEPTIONIST AUTH
@@ -46,7 +47,6 @@ import ReceptionistLogin from "../pages/receptionist/ReceptionistLogin";
 // =========================
 // RECEPTIONIST
 // =========================
-
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 import ReceptionistPatients from "../pages/receptionist/ReceptionistPatients";
 import ReceptionistPatientDetails from "../pages/receptionist/ReceptionistPatientDetails";
@@ -58,19 +58,16 @@ import ReceptionistProfile from "../pages/receptionist/ReceptionistProfile";
 import ReceptionistChangePassword from "../pages/receptionist/ReceptionistChangePassword";
 
 // =========================
-// ADMIN LOGIN
+// ADMIN
 // =========================
-
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminLayout from "../components/admin/AdminLayout";
-
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminCreateUser from "../pages/admin/AdminCreateUser";
 import AdminSchedules from "../pages/admin/AdminSchedules";
 import AdminProfile from "../pages/admin/AdminProfile";
 import AdminChangePassword from "../pages/admin/AdminChangePassword";
-
 
 function AppRoutes() {
   return (
@@ -170,11 +167,6 @@ function AppRoutes() {
         element={<DoctorAppointments />}
       />
 
-
-      {/* =========================
-          DOCTOR REPORT
-      ========================== */}
-
       <Route
         path="/doctor/appointments/:appointmentId/report"
         element={<MedicalReport />}
@@ -190,14 +182,14 @@ function AppRoutes() {
         element={<DoctorPatients />}
       />
 
-
-      {/* =========================
-          PATIENT HISTORY
-      ========================== */}
-
       <Route
         path="/doctor/patients/:patientId/history"
         element={<PatientHistory />}
+      />
+
+      <Route
+        path="/doctor/patients/:patientId/share"
+        element={<DoctorSharePatient />}
       />
 
 
@@ -217,7 +209,7 @@ function AppRoutes() {
 
 
       {/* =========================
-          RECEPTIONIST 
+          RECEPTIONIST
       ========================== */}
 
       <Route
@@ -269,72 +261,71 @@ function AppRoutes() {
         path="/receptionist/change-password"
         element={<ReceptionistChangePassword />}
       />
-      
-      
 
 
-   {/* =========================
-    ADMIN
-========================== */}
+      {/* =========================
+          ADMIN
+      ========================== */}
 
-<Route
-  path="/admin/login"
-  element={<AdminLogin />}
-/>
+      <Route
+        path="/admin/login"
+        element={<AdminLogin />}
+      />
 
-<Route
-  path="/admin/dashboard"
-  element={
-    <AdminLayout>
-      <AdminDashboard />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        }
+      />
 
-<Route
-  path="/admin/users"
-  element={
-    <AdminLayout>
-      <AdminUsers />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/users"
+        element={
+          <AdminLayout>
+            <AdminUsers />
+          </AdminLayout>
+        }
+      />
 
-<Route
-  path="/admin/users/create"
-  element={
-    <AdminLayout>
-      <AdminCreateUser />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/users/create"
+        element={
+          <AdminLayout>
+            <AdminCreateUser />
+          </AdminLayout>
+        }
+      />
 
-<Route
-  path="/admin/schedules"
-  element={
-    <AdminLayout>
-      <AdminSchedules />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/schedules"
+        element={
+          <AdminLayout>
+            <AdminSchedules />
+          </AdminLayout>
+        }
+      />
 
-<Route
-  path="/admin/profile"
-  element={
-    <AdminLayout>
-      <AdminProfile />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/profile"
+        element={
+          <AdminLayout>
+            <AdminProfile />
+          </AdminLayout>
+        }
+      />
 
-<Route
-  path="/admin/change-password"
-  element={
-    <AdminLayout>
-      <AdminChangePassword />
-    </AdminLayout>
-  }
-/>
+      <Route
+        path="/admin/change-password"
+        element={
+          <AdminLayout>
+            <AdminChangePassword />
+          </AdminLayout>
+        }
+      />
+
     </Routes>
   );
 }

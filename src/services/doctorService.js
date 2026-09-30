@@ -136,7 +136,13 @@ const doctorService = {
     return response.data;
   },
 
- 
+  sharePatient: async (patientId, data) => {
+  const response = await api.post(
+    `/doctor/patient/${patientId}/share`,
+    data
+  );
+  return response.data;
+},
 
 };
 

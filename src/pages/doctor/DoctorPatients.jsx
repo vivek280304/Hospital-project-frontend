@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Loader2,
   AlertCircle,
+  Share2,
 } from "lucide-react";
 
 import doctorService from "../../services/doctorService";
@@ -366,19 +367,38 @@ function DoctorPatients() {
 
                 </div>
 
-                {/* Action */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `/doctor/patients/${patient.patientId}/history`
-                    )
-                  }
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-                >
-                  <Eye size={17} />
-                  View Medical History
-                </button>
+                {/* Actions */}
+<div className="mt-5 grid grid-cols-2 gap-3">
+
+  {/* Medical History */}
+  <button
+    type="button"
+    onClick={() =>
+      navigate(
+        `/doctor/patients/${patient.patientId}/history`
+      )
+    }
+    className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+  >
+    <Eye size={17} />
+    History
+  </button>
+
+  {/* Share Patient */}
+  <button
+    type="button"
+    onClick={() =>
+      navigate(
+        `/doctor/patients/${patient.patientId}/share`
+      )
+    }
+    className="flex items-center justify-center gap-2 rounded-xl bg-indigo-50 px-3 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+  >
+    <Share2 size={17} />
+    Share
+  </button>
+
+</div>
 
               </article>
 

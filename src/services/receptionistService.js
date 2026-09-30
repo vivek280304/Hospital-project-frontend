@@ -78,6 +78,37 @@ const receptionistService = {
 
     return response.data;
   },
+
+ getDoctorLeaves: async (doctorId) => {
+  const response = await api.get(
+    `/receptionist/doctors/${doctorId}/leaves`
+  );
+
+  return response.data;
+},
+
+createDoctorLeave: async (doctorId, data) => {
+  const response = await api.post(
+    `/receptionist/doctors/${doctorId}/leave`,
+    data
+  );
+
+  return response.data;
+},
+
+removeDoctorLeave: async (doctorId, date) => {
+  const response = await api.delete(
+    `/receptionist/doctors/${doctorId}/leave`,
+    {
+      params: {
+        date: date,
+      },
+    }
+  );
+
+  return response.data;
+},
+
 };
 
 export default receptionistService;
