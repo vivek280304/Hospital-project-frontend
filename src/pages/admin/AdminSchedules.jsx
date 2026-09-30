@@ -49,11 +49,18 @@ function AdminSchedules() {
 
         console.log("ADMIN SCHEDULE DOCTORS:", response.data);
 
-        const data = Array.isArray(response.data)
-          ? response.data
-          : [];
+      const data = Array.isArray(response.data)
+  ? response.data
+  : [];
 
-        setDoctors(data);
+const normalizedDoctors = data.map((doctor) => ({
+  ...doctor,
+  doctorId: doctor.id ?? doctor.doctorId,
+}));
+
+console.log("NORMALIZED DOCTORS:", normalizedDoctors);
+
+setDoctors(normalizedDoctors);
       } catch (err) {
         console.error(
           "LOAD DOCTORS ERROR:",
@@ -166,11 +173,9 @@ function AdminSchedules() {
         payload
       );
 
-      const doctor = doctors.find(
-        (item) =>
-          Number(item.id) ===
-          Number(formData.doctorId)
-      );
+     const doctor = doctors.find(
+  (item) => Number(item.doctorId) === Number(formData.doctorId)
+);
 
       setSuccess(
         `Schedule created successfully${
@@ -308,31 +313,32 @@ function AdminSchedules() {
                   className="absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
                 />
 
-                <select
-                  name="doctorId"
-                  value={formData.doctorId}
-                  onChange={handleChange}
-                  disabled={loadingDoctors}
-                  className={`${inputClass} pl-11`}
-                >
-                  <option value="">
-                    {loadingDoctors
-                      ? "Loading doctors..."
-                      : "Select doctor"}
-                  </option>
+             <select
+  name="doctorId"
+  value={formData.doctorId}
+  onChange={handleChange}
+  disabled={loadingDoctors}
+  className={`${inputClass} pl-11`}
+  required
+>
+  <option value="">
+    {loadingDoctors
+      ? "Loading doctors..."
+      : "Select doctor"}
+  </option>
 
-                  {doctors.map((doctor) => (
-                    <option
-                      key={doctor.id}
-                      value={doctor.id}
-                    >
-                      {doctor.name}
-                      {doctor.specialization
-                        ? ` — ${doctor.specialization}`
-                        : ""}
-                    </option>
-                  ))}
-                </select>
+  {doctors.map((doctor) => (
+    <option
+      key={doctor.doctorId}
+      value={doctor.doctorId}
+    >
+      {doctor.name}
+      {doctor.specialization
+        ? ` — ${doctor.specialization}`
+        : ""}
+    </option>
+  ))}
+</select>
               </div>
 
               {!loadingDoctors &&
