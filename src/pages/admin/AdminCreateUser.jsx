@@ -358,22 +358,19 @@ function AdminCreateUser() {
                   required
                 >
                   <option value="">Select role</option>
-                  <option value="DOCTOR">Doctor</option>
-                  <option value="NURSE">Nurse</option>
-                  <option value="RECEPTIONIST">
-                    Receptionist
-                  </option>
-                  <option value="LAB_TECHNICIAN">
-                    Lab Technician
-                  </option>
+<option value="ADMIN">Admin</option>
+<option value="DOCTOR">Doctor</option>
+<option value="NURSE">Nurse</option>
+<option value="RECEPTIONIST">Receptionist</option>
+<option value="LAB_TECHNICIAN">Lab Technician</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Professional Information */}
-        <div className="p-5 sm:p-6">
+{/* Professional Information */}
+{formData.role && formData.role !== "ADMIN" && (
+<div className="p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
               <Stethoscope size={20} />
@@ -418,6 +415,7 @@ function AdminCreateUser() {
               </div>
             </div>
 
+            
             {/* Department */}
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -547,6 +545,7 @@ function AdminCreateUser() {
             </button>
           </div>
         </div>
+)}
       </form>
     </div>
   );

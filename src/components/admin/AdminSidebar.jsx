@@ -49,11 +49,7 @@ function AdminSidebar({ mobileOpen = false, onClose }) {
       path: "/admin/schedules",
       icon: CalendarDays,
     },
-    {
-      label: "Find User",
-      path: "/admin/users/find",
-      icon: UserSearch,
-    },
+   
     {
       label: "Create User",
       path: "/admin/users/create",

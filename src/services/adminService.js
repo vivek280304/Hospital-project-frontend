@@ -2,6 +2,24 @@ import api from "./api";
 
 const adminService = {
   // ==========================================
+  // ADMIN PROFILE
+  // GET /api/admin/profile
+  // ==========================================
+  getProfile: async () => {
+    const response = await api.get("/admin/profile");
+    return response.data;
+  },
+
+  // ==========================================
+  // ROLE COUNTS
+  // GET /api/admin/role-counts
+  // ==========================================
+  getRoleCounts: async () => {
+    const response = await api.get("/admin/role-counts");
+    return response.data;
+  },
+
+  // ==========================================
   // CREATE USER
   // POST /api/admin/create-users
   // ==========================================
@@ -32,7 +50,7 @@ const adminService = {
   },
 
   // ==========================================
-  // LOCK USER ACCOUNT
+  // LOCK USER
   // PATCH /api/admin/users/{id}/lock
   // ==========================================
   lockUser: async (userId) => {
@@ -44,7 +62,7 @@ const adminService = {
   },
 
   // ==========================================
-  // UNLOCK USER ACCOUNT
+  // UNLOCK USER
   // PATCH /api/admin/users/{id}/unlock
   // ==========================================
   unlockUser: async (userId) => {

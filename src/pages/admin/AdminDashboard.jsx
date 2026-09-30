@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Users,
   UserPlus,
@@ -8,30 +9,91 @@ import {
   UserRound,
   ClipboardList,
   UserCog,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+import adminService from "../../services/adminService";
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
+  const [roleCounts, setRoleCounts] = useState({
+    doctors: 0,
+    nurses: 0,
+    receptionists: 0,
+    labTechnicians: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // ==========================================
+  // LOAD DASHBOARD DATA
+  // ==========================================
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await adminService.getRoleCounts();
+
+        console.log("ADMIN ROLE COUNTS:", data);
+
+        setRoleCounts({
+          doctors: data?.doctors ?? 0,
+          nurses: data?.nurses ?? 0,
+          receptionists: data?.receptionists ?? 0,
+          labTechnicians: data?.labTechnicians ?? 0,
+        });
+      } catch (err) {
+        console.error(
+          "ADMIN DASHBOARD ERROR:",
+          err
+        );
+
+        setError(
+          err.response?.data?.message ||
+            err.response?.data ||
+            "Unable to load dashboard data."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  // ==========================================
+  // STAT CARDS
+  // ==========================================
+
   const stats = [
     {
       title: "Doctors",
+      value: roleCounts.doctors,
       description: "Registered doctors",
       icon: Stethoscope,
     },
     {
       title: "Nurses",
+      value: roleCounts.nurses,
       description: "Registered nurses",
       icon: UserRound,
     },
     {
       title: "Receptionists",
+      value: roleCounts.receptionists,
       description: "Registered receptionists",
       icon: UserCog,
     },
     {
       title: "Lab Technicians",
+      value: roleCounts.labTechnicians,
       description: "Registered lab staff",
       icon: ClipboardList,
     },
@@ -40,9 +102,10 @@ function AdminDashboard() {
   return (
     <div className="mx-auto max-w-7xl space-y-7">
 
-      {/* ================================
+      {/* ========================================
           PAGE HEADER
-      ================================= */}
+      ========================================= */}
+
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
         <div>
@@ -79,9 +142,33 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* ================================
+      {/* ========================================
+          ERROR
+      ========================================= */}
+
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <AlertCircle
+            size={19}
+            className="mt-0.5 shrink-0"
+          />
+
+          <div>
+            <p className="font-semibold">
+              Dashboard data could not be loaded
+            </p>
+
+            <p className="mt-1">
+              {error}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================
           STAFF STATISTICS
-      ================================= */}
+      ========================================= */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {stats.map((stat) => {
@@ -99,9 +186,16 @@ function AdminDashboard() {
                     {stat.title}
                   </p>
 
-                  <p className="mt-3 text-3xl font-bold text-slate-900">
-                    —
-                  </p>
+                  <div className="mt-3 text-3xl font-bold text-slate-900">
+                    {loading ? (
+                      <Loader2
+                        size={27}
+                        className="animate-spin text-blue-600"
+                      />
+                    ) : (
+                      stat.value
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
@@ -117,12 +211,14 @@ function AdminDashboard() {
         })}
       </div>
 
-      {/* ================================
-          MANAGEMENT
-      ================================= */}
+      {/* ========================================
+          MANAGEMENT CARDS
+      ========================================= */}
+
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* USER MANAGEMENT */}
+
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
           <div className="flex items-start gap-4">
@@ -165,7 +261,9 @@ function AdminDashboard() {
 
             <button
               type="button"
-              onClick={() => navigate("/admin/users")}
+              onClick={() =>
+                navigate("/admin/users")
+              }
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
               Manage Users
@@ -176,6 +274,7 @@ function AdminDashboard() {
         </div>
 
         {/* CREATE USER */}
+
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
           <div className="flex items-start gap-4">
@@ -231,32 +330,30 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* ================================
+      {/* ========================================
           SCHEDULE + SECURITY
-      ================================= */}
+      ========================================= */}
+
       <div className="grid gap-6 lg:grid-cols-5">
 
         {/* DOCTOR SCHEDULE */}
-        <div className="lg:col-span-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-          <div className="flex items-start justify-between">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-3">
 
-            <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4">
 
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                <CalendarDays size={23} />
-              </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+              <CalendarDays size={23} />
+            </div>
 
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Doctor Schedules
-                </h2>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Doctor Schedules
+              </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Configure doctor working days and appointment slots.
-                </p>
-              </div>
-
+              <p className="mt-1 text-sm text-slate-500">
+                Configure doctor working days and appointment slots.
+              </p>
             </div>
 
           </div>
@@ -302,8 +399,9 @@ function AdminDashboard() {
 
         </div>
 
-        {/* SECURITY */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        {/* ACCOUNT SECURITY */}
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
 
           <div className="flex items-start gap-4">
 
@@ -331,28 +429,17 @@ function AdminDashboard() {
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
 
                 <span className="text-sm font-medium text-slate-700">
-                  Active Accounts
+                  Registered Staff
                 </span>
               </div>
 
               <span className="font-bold text-slate-800">
-                —
-              </span>
-
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl bg-red-50 px-4 py-4">
-
-              <div className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-
-                <span className="text-sm font-medium text-slate-700">
-                  Locked Accounts
-                </span>
-              </div>
-
-              <span className="font-bold text-slate-800">
-                —
+                {loading
+                  ? "—"
+                  : roleCounts.doctors +
+                    roleCounts.nurses +
+                    roleCounts.receptionists +
+                    roleCounts.labTechnicians}
               </span>
 
             </div>
@@ -361,7 +448,9 @@ function AdminDashboard() {
 
           <button
             type="button"
-            onClick={() => navigate("/admin/users")}
+            onClick={() =>
+              navigate("/admin/users")
+            }
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
           >
             Manage Accounts
@@ -371,9 +460,10 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* ================================
+      {/* ========================================
           QUICK ACTIONS
-      ================================= */}
+      ========================================= */}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
         <div className="flex items-center gap-3">
@@ -449,7 +539,6 @@ function AdminDashboard() {
 
         </div>
       </div>
-
     </div>
   );
 }
