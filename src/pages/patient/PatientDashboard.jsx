@@ -385,12 +385,12 @@ function PatientDashboard() {
             TOPBAR
         ========================= */}
 
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-slate-200 bg-white/95 px-2 backdrop-blur sm:h-20 sm:gap-3 sm:px-5 md:px-8">
 
           {/* MOBILE MENU */}
 
           <button
-            className="rounded-lg p-2 text-slate-600 lg:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 lg:hidden"
             onClick={() =>
               setMobileMenu(true)
             }
@@ -402,154 +402,297 @@ function PatientDashboard() {
               SEARCH
           ========================= */}
 
-          <div className="relative hidden w-full max-w-md md:block">
+    <div className="relative min-w-0 flex-1 lg:max-w-2xl">
 
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 focus-within:border-blue-500 focus-within:bg-white">
+  <div
+    className="
+      flex h-11 w-full items-center
+      rounded-xl
+      border border-slate-200
+      bg-slate-50
+      px-2
+      transition
+      focus-within:border-blue-500
+      focus-within:bg-white
+      focus-within:ring-2
+      focus-within:ring-blue-500/10
+      sm:h-12
+      sm:px-3
+    "
+  >
 
-              <Search
-                size={18}
-                className="shrink-0 text-slate-400"
-              />
+    {/* SEARCH ICON */}
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-400">
+      <Search size={17} />
+    </div>
 
-              <input
-                type="text"
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                  setShowSearchResults(false);
-                  setSearchError("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    searchDoctors();
-                  }
-                }}
-                placeholder="Search specialization..."
-                className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
+    {/* INPUT */}
+    <input
+      type="text"
+      value={searchText}
+      onChange={(e) => {
+        setSearchText(e.target.value);
+        setShowSearchResults(false);
+        setSearchError("");
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          searchDoctors();
+        }
 
-              <button
-                type="button"
-                onClick={searchDoctors}
-                disabled={searchLoading}
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {searchLoading
-                  ? "..."
-                  : "Search"}
-              </button>
+        if (e.key === "Escape") {
+          setShowSearchResults(false);
+        }
+      }}
+      placeholder="Search doctors..."
+      className="
+        min-w-0 flex-1
+        bg-transparent
+        px-1.5
+        text-sm
+        text-slate-700
+        outline-none
+        placeholder:text-slate-400
+        sm:px-2
+      "
+    />
 
-            </div>
+    {/* CLEAR */}
+    {searchText && (
+      <button
+        type="button"
+        onClick={() => {
+          setSearchText("");
+          setSearchResults([]);
+          setSearchError("");
+          setShowSearchResults(false);
+        }}
+        className="
+          flex h-7 w-7 shrink-0
+          items-center justify-center
+          rounded-full
+          text-slate-400
+          hover:bg-slate-200
+        "
+      >
+        <X size={14} />
+      </button>
+    )}
 
-            {/* SEARCH RESULTS */}
+    {/* SEARCH BUTTON */}
+    <button
+      type="button"
+      onClick={searchDoctors}
+      disabled={searchLoading || !searchText.trim()}
+      className="
+        flex h-8 shrink-0
+        items-center justify-center
+        rounded-lg
+        bg-blue-600
+        px-3
+        text-xs
+        font-semibold
+        text-white
+        transition
+        hover:bg-blue-700
+        disabled:bg-slate-300
+        disabled:cursor-not-allowed
+        sm:h-9
+        sm:px-4
+      "
+    >
+      {searchLoading ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <>
+          <Search size={14} className="sm:hidden" />
+          <span className="hidden sm:inline">Search</span>
+        </>
+      )}
+    </button>
 
-            {showSearchResults && (
-              <div className="absolute left-0 right-0 top-14 z-50 max-h-96 overflow-y-auto overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+  </div>
 
-                {searchLoading && (
-                  <div className="p-5 text-center text-sm text-slate-500">
-                    Searching doctors...
+  {/* RESULTS */}
+  {showSearchResults && (
+    <div
+      className="
+        absolute
+        left-0
+        right-0
+        top-12
+        z-50
+        overflow-hidden
+        rounded-xl
+        border border-slate-200
+        bg-white
+        shadow-xl
+        sm:top-14
+        sm:rounded-2xl
+      "
+    >
+
+      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 sm:text-xs">
+            Doctor Search
+          </p>
+
+          <p className="text-xs font-semibold text-slate-700 sm:text-sm">
+            {searchLoading
+              ? "Searching..."
+              : `${searchResults.length} doctor${
+                  searchResults.length === 1 ? "" : "s"
+                } found`}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowSearchResults(false)}
+          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+        >
+          <X size={15} />
+        </button>
+
+      </div>
+
+      {searchLoading && (
+        <div className="flex items-center justify-center gap-2 p-6">
+          <Loader2
+            size={20}
+            className="animate-spin text-blue-600"
+          />
+
+          <span className="text-xs text-slate-500">
+            Searching doctors...
+          </span>
+        </div>
+      )}
+
+      {!searchLoading &&
+        searchError && (
+          <div className="p-6 text-center">
+            <p className="text-sm font-semibold text-red-600">
+              Search failed
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              {searchError}
+            </p>
+          </div>
+        )}
+
+      {!searchLoading &&
+        !searchError &&
+        searchResults.length === 0 && (
+          <div className="p-6 text-center">
+            <Search
+              size={22}
+              className="mx-auto text-slate-300"
+            />
+
+            <p className="mt-2 text-sm font-semibold text-slate-700">
+              No doctors found
+            </p>
+
+            <p className="mt-1 text-xs text-slate-400">
+              Try another specialization.
+            </p>
+          </div>
+        )}
+
+      {!searchLoading &&
+        !searchError &&
+        searchResults.length > 0 && (
+          <div className="max-h-[60vh] overflow-y-auto">
+
+            {searchResults.map((doctor) => {
+              const doctorId =
+                doctor.id ??
+                doctor.doctorId ??
+                doctor.userId;
+
+              const name =
+                doctor.name ??
+                doctor.fullName ??
+                doctor.doctorName ??
+                doctor.user?.name ??
+                "Doctor";
+
+              const specialization =
+                doctor.specialization ??
+                doctor.department ??
+                "General Medicine";
+
+              const experience =
+                doctor.experience ??
+                doctor.yearsOfExperience;
+
+              return (
+                <button
+                  key={doctorId}
+                  type="button"
+                  disabled={!doctorId}
+                  onClick={() => {
+                    if (!doctorId) return;
+
+                    setShowSearchResults(false);
+                    navigate(`/doctors/${doctorId}`);
+                  }}
+                  className="
+                    flex w-full items-center
+                    gap-3
+                    border-b border-slate-100
+                    px-3 py-3
+                    text-left
+                    hover:bg-blue-50
+                    sm:px-4
+                  "
+                >
+
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 sm:h-10 sm:w-10">
+                    <UserRound size={17} />
                   </div>
-                )}
 
-                {!searchLoading &&
-                  searchError && (
-                    <div className="p-5 text-center text-sm text-red-500">
-                      {searchError}
-                    </div>
-                  )}
+                  <div className="min-w-0 flex-1">
 
-                {!searchLoading &&
-                  !searchError &&
-                  searchResults.length === 0 && (
-                    <div className="p-5 text-center text-sm text-slate-500">
-                      No doctors found for "
-                      {searchText}".
-                    </div>
-                  )}
+                    <p className="truncate text-sm font-semibold text-slate-800">
+                      {name}
+                    </p>
 
-                {!searchLoading &&
-                  !searchError &&
-                  searchResults.map((doctor) => {
+                    <p className="truncate text-xs text-blue-600">
+                      {specialization}
+                    </p>
 
-                    const doctorId =
-                      doctor.id ??
-                      doctor.doctorId ??
-                      doctor.userId;
+                    {experience != null && (
+                      <p className="mt-0.5 text-[10px] text-slate-400">
+                        {experience}+ years experience
+                      </p>
+                    )}
 
-                    const name =
-                      doctor.name ??
-                      doctor.fullName ??
-                      doctor.doctorName ??
-                      doctor.user?.name ??
-                      "Doctor";
+                  </div>
 
-                    const specialization =
-                      doctor.specialization ??
-                      doctor.department ??
-                      "General Medicine";
+                  <ChevronRight
+                    size={16}
+                    className="shrink-0 text-slate-300"
+                  />
 
-                    const experience =
-                      doctor.experience ??
-                      doctor.yearsOfExperience;
-
-                    return (
-                      <button
-                        key={doctorId}
-                        type="button"
-                        disabled={!doctorId}
-                        onClick={() => {
-                          if (!doctorId) return;
-
-                          setShowSearchResults(false);
-
-                          navigate(
-                            `/doctors/${doctorId}`
-                          );
-                        }}
-                        className="flex w-full items-center gap-4 border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                          <UserRound size={19} />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-
-                          <p className="truncate text-sm font-bold text-slate-800">
-                            {name}
-                          </p>
-
-                          <p className="text-xs text-blue-600">
-                            {specialization}
-                          </p>
-
-                          {experience != null && (
-                            <p className="text-xs text-slate-400">
-                              {experience}+
-                              years experience
-                            </p>
-                          )}
-
-                        </div>
-
-                        <ChevronRight
-                          size={17}
-                          className="text-slate-400"
-                        />
-
-                      </button>
-                    );
-                  })}
-
-              </div>
-            )}
+                </button>
+              );
+            })}
 
           </div>
+        )}
 
+    </div>
+  )}
+
+</div>
           {/* PATIENT */}
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
 
             <div className="hidden text-right sm:block">
 
@@ -563,7 +706,7 @@ function PatientDashboard() {
 
             </div>
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 sm:h-11 sm:w-11">
               <UserRound size={22} />
             </div>
 
@@ -575,7 +718,7 @@ function PatientDashboard() {
             CONTENT
         ========================= */}
 
-        <main className="p-5 md:p-8">
+        <main className="p-3 sm:p-5 md:p-8">
 
           {/* DASHBOARD */}
 
@@ -670,18 +813,18 @@ function DashboardHome({
 
       {/* WELCOME */}
 
-      <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-blue-500 p-7 text-white shadow-lg">
+      <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 p-5 text-white shadow-lg sm:rounded-3xl sm:p-7">
 
         <p className="text-sm text-blue-100">
           Patient Dashboard
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold">
+        <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
           Welcome Back,{" "}
           {profile?.name || "Patient"}!
         </h1>
 
-        <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">
+        <p className="mt-2 hidden max-w-xl text-sm leading-6 text-blue-100 sm:block">
           Take control of your health. Manage
           appointments, medical reports and your
           healthcare records from one place.
@@ -691,7 +834,7 @@ function DashboardHome({
 
       {/* STATS */}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
 
         <StatCard
           icon={CalendarDays}
@@ -725,7 +868,7 @@ function DashboardHome({
 
       {/* APPOINTMENTS + QUICK ACTIONS */}
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)_96px] gap-3 sm:mt-6 sm:grid-cols-1 sm:gap-6 xl:grid-cols-2">
 
         <Panel
           title="Upcoming Appointments"
@@ -776,7 +919,7 @@ function DashboardHome({
 
         <Panel title="Quick Actions">
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
 
             <QuickAction
               icon={CalendarDays}
@@ -1665,14 +1808,14 @@ function QuickAction({
   return (
     <button
       onClick={onClick}
-      className="rounded-xl border border-slate-100 bg-slate-50 p-5 text-left transition hover:border-blue-200 hover:bg-blue-50"
+      className="flex min-h-[58px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50 p-2 text-left transition hover:border-blue-200 hover:bg-blue-50 sm:block sm:min-h-0 sm:p-5"
     >
 
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 sm:h-11 sm:w-11 sm:rounded-xl">
         <Icon size={21} />
       </div>
 
-      <p className="mt-3 text-sm font-semibold text-slate-800">
+      <p className="mt-3 hidden text-sm font-semibold text-slate-800 sm:block">
         {title}
       </p>
 

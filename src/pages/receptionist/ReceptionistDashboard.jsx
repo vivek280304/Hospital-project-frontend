@@ -782,7 +782,7 @@ export default function ReceptionistDashboard() {
 
           <SidebarItem
             icon={<CalendarDays size={20} />}
-            label="My Appointments"
+            label="Appointments"
             onClick={() =>
               nav(
                 "/receptionist/appointments"
