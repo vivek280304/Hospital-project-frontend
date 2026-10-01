@@ -1,4 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 // =========================
 // PUBLIC
@@ -19,8 +23,19 @@ import PatientResetPassword from "../pages/auth/patient/PatientResetPassword";
 // =========================
 // PATIENT
 // =========================
-import PatientDashboard from "../pages/patient/PatientDashboard";
+import PatientLayout from "../components/patient/PatientLayout";
+
+import Dashboard from "../pages/patient/Dashboard";
+import Appointments from "../pages/patient/Appointments";
 import BookAppointment from "../pages/patient/BookAppointment";
+
+import Reports from "../pages/patient/Reports";
+import LabTests from "../pages/patient/LabTests";
+import LabOrders from "../pages/patient/LabOrders";
+import Imaging from "../pages/patient/Imaging";
+import Doctors from "../pages/patient/Doctors";
+import Profile from "../pages/patient/Profile";
+import ChangePassword from "../pages/patient/ChangePassword";
 
 // =========================
 // DOCTOR AUTH
@@ -69,13 +84,14 @@ import AdminSchedules from "../pages/admin/AdminSchedules";
 import AdminProfile from "../pages/admin/AdminProfile";
 import AdminChangePassword from "../pages/admin/AdminChangePassword";
 
+
 function AppRoutes() {
   return (
     <Routes>
 
-      {/* =========================
+      {/* =====================================================
           PUBLIC
-      ========================== */}
+      ===================================================== */}
 
       <Route
         path="/"
@@ -93,9 +109,9 @@ function AppRoutes() {
       />
 
 
-      {/* =========================
+      {/* =====================================================
           PATIENT AUTH
-      ========================== */}
+      ===================================================== */}
 
       <Route
         path="/patient/login"
@@ -123,24 +139,75 @@ function AppRoutes() {
       />
 
 
-      {/* =========================
+      {/* =====================================================
           PATIENT
-      ========================== */}
+      ===================================================== */}
 
       <Route
-        path="/patient/dashboard"
-        element={<PatientDashboard />}
-      />
+        path="/patient"
+        element={<PatientLayout />}
+      >
+        {/* /patient -> /patient/dashboard */}
+        <Route
+          index
+          element={<Navigate to="dashboard" replace />}
+        />
 
-      <Route
+        <Route
+          path="dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="appointments"
+          element={<Appointments />}
+        />
+
+        <Route
         path="/patient/book-appointment"
         element={<BookAppointment />}
       />
 
+        <Route
+          path="reports"
+          element={<Reports />}
+        />
 
-      {/* =========================
+        <Route
+          path="lab-tests"
+          element={<LabTests />}
+        />
+
+        <Route
+          path="lab-orders"
+          element={<LabOrders />}
+        />
+
+        <Route
+          path="imaging"
+          element={<Imaging />}
+        />
+
+        <Route
+          path="doctors"
+          element={<Doctors />}
+        />
+
+        <Route
+          path="profile"
+          element={<Profile />}
+        />
+
+        <Route
+          path="change-password"
+          element={<ChangePassword />}
+        />
+      </Route>
+
+
+      {/* =====================================================
           DOCTOR AUTH
-      ========================== */}
+      ===================================================== */}
 
       <Route
         path="/doctor/login"
@@ -148,19 +215,14 @@ function AppRoutes() {
       />
 
 
-      {/* =========================
-          DOCTOR DASHBOARD
-      ========================== */}
+      {/* =====================================================
+          DOCTOR
+      ===================================================== */}
 
       <Route
         path="/doctor/dashboard"
         element={<DoctorDashboard />}
       />
-
-
-      {/* =========================
-          DOCTOR APPOINTMENTS
-      ========================== */}
 
       <Route
         path="/doctor/appointments"
@@ -171,11 +233,6 @@ function AppRoutes() {
         path="/doctor/appointments/:appointmentId/report"
         element={<MedicalReport />}
       />
-
-
-      {/* =========================
-          DOCTOR PATIENTS
-      ========================== */}
 
       <Route
         path="/doctor/patients"
@@ -192,11 +249,6 @@ function AppRoutes() {
         element={<DoctorSharePatient />}
       />
 
-
-      {/* =========================
-          DOCTOR PROFILE
-      ========================== */}
-
       <Route
         path="/doctor/profile"
         element={<DoctorProfile />}
@@ -208,9 +260,9 @@ function AppRoutes() {
       />
 
 
-      {/* =========================
+      {/* =====================================================
           RECEPTIONIST
-      ========================== */}
+      ===================================================== */}
 
       <Route
         path="/receptionist/login"
@@ -263,9 +315,9 @@ function AppRoutes() {
       />
 
 
-      {/* =========================
+      {/* =====================================================
           ADMIN
-      ========================== */}
+      ===================================================== */}
 
       <Route
         path="/admin/login"
@@ -324,6 +376,15 @@ function AppRoutes() {
             <AdminChangePassword />
           </AdminLayout>
         }
+      />
+
+      {/* =====================================================
+          FALLBACK
+      ===================================================== */}
+
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
       />
 
     </Routes>
