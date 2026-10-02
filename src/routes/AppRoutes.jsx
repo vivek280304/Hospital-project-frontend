@@ -45,6 +45,7 @@ import DoctorLogin from "../pages/doctor/DoctorLogin";
 // =========================
 // DOCTOR
 // =========================
+import PatientLabReports from "../components/doctor/PatientLabReports";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorPatients from "../pages/doctor/DoctorPatients";
@@ -84,6 +85,20 @@ import AdminSchedules from "../pages/admin/AdminSchedules";
 import AdminProfile from "../pages/admin/AdminProfile";
 import AdminChangePassword from "../pages/admin/AdminChangePassword";
 
+// =========================
+// LAB TECHNICIAN
+// =========================
+import LabTechnicianLogin from "../pages/labTechnician/Login";
+import LabTechnicianLayout from "../components/labTechnician/LabTechnicianLayout";
+import LabTechnicianDashboard from "../pages/labTechnician/Dashboard";
+import LabTechnicianOrders from "../pages/labTechnician/LabOrders";
+import MyWork from "../pages/labTechnician/MyWork";
+import OrderDetails from "../pages/labTechnician/OrderDetails";
+import Results from "../pages/labTechnician/Results";
+import UploadImaging from "../pages/labTechnician/Imaging";
+import LabTechnicianProfile from "../pages/labTechnician/Profile";
+import LabTechnicianChangePassword from "../pages/labTechnician/ChangePassword";
+import PatientsList from "../pages/labTechnician/Patients";
 
 function AppRoutes() {
   return (
@@ -147,6 +162,7 @@ function AppRoutes() {
         path="/patient"
         element={<PatientLayout />}
       >
+
         {/* /patient -> /patient/dashboard */}
         <Route
           index
@@ -164,9 +180,9 @@ function AppRoutes() {
         />
 
         <Route
-        path="/patient/book-appointment"
-        element={<BookAppointment />}
-      />
+          path="book-appointment"
+          element={<BookAppointment />}
+        />
 
         <Route
           path="reports"
@@ -202,6 +218,7 @@ function AppRoutes() {
           path="change-password"
           element={<ChangePassword />}
         />
+
       </Route>
 
 
@@ -258,6 +275,11 @@ function AppRoutes() {
         path="/doctor/change-password"
         element={<DoctorChangePassword />}
       />
+
+      <Route
+  path="/doctor/patients/:patientId/lab-reports"
+  element={<PatientLabReports />}
+/>
 
 
       {/* =====================================================
@@ -378,14 +400,93 @@ function AppRoutes() {
         }
       />
 
+
+      {/* =====================================================
+          LAB TECHNICIAN LOGIN
+      ===================================================== */}
+
+      <Route
+        path="/lab-technician/login"
+        element={<LabTechnicianLogin />}
+      />
+
+
+      {/* =====================================================
+          LAB TECHNICIAN
+      ===================================================== */}
+
+      <Route
+        path="/lab-technician"
+        element={<LabTechnicianLayout />}
+      >
+
+        {/* /lab-technician -> /lab-technician/dashboard */}
+        <Route
+          index
+          element={<Navigate to="dashboard" replace />}
+        />
+
+        <Route
+          path="dashboard"
+          element={<LabTechnicianDashboard />}
+        />
+
+        <Route
+          path="orders"
+          element={<LabTechnicianOrders />}
+        />
+
+         <Route
+    path="my-work"
+    element={<MyWork />}
+  />
+
+  <Route
+    path="orders/:orderId"
+    element={<OrderDetails />}
+  />
+
+  <Route
+    path="results"
+    element={<Results />}
+  />
+
+  <Route
+  path="imaging"
+  element={<UploadImaging />}
+/>
+
+<Route
+  path="profile"
+  element={<LabTechnicianProfile />}
+/>
+
+<Route
+  path="change-password"
+  element={<LabTechnicianChangePassword />}
+/>
+
+<Route
+  path="patients"
+  element={<PatientsList />}
+/>
+
+      </Route>
+
+
       {/* =====================================================
           FALLBACK
+          MUST BE LAST
       ===================================================== */}
 
       <Route
         path="*"
         element={<Navigate to="/" replace />}
       />
+
+
+  
+
 
     </Routes>
   );

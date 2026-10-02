@@ -67,16 +67,16 @@ const patientService = {
     return response.data;
   },
 
-  bookLabTest: async (data) => {
-    const response = await api.post(
-      "/patient/lab-tests/orders",
-      data
-    );
+  async bookLabTest(data) {
+  const response = await api.post(
+    "/patient/lab-tests/orders",
+    data
+  );
 
-    return response.data;
-  },
+  return response.data;
+},
 
-  getLabOrders: async () => {
+ async getLabOrders() {
     const response = await api.get(
       "/patient/lab-tests/get-orders"
     );
@@ -92,11 +92,7 @@ const patientService = {
     return response.data;
   },
 
-  bookAppointment: async (data) => {
-  const response = await api.post("/patient/appointments", data);
-  return response.data;
-},
-
+  
 };
 
 export default patientService;

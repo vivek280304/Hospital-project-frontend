@@ -407,20 +407,37 @@ function DoctorAppointments() {
                           <td className="px-6 py-5">
                             <div className="flex justify-end gap-2">
                               {/* DOCTOR REPORT: available only for BOOKED or COMPLETED */}
-                              {["BOOKED", "COMPLETED"].includes(status) && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    navigate(
-                                      `/doctor/appointments/${appointment.appointmentId}/report`
-                                    )
-                                  }
-                                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700"
-                                >
-                                  <FileText size={16} />
-                                  Create Report
-                                </button>
-                              )}
+                             {/* CREATE MEDICAL REPORT */}
+{["BOOKED", "COMPLETED"].includes(status) && (
+  <button
+    type="button"
+    onClick={() =>
+      navigate(
+        `/doctor/appointments/${appointment.appointmentId}/report`
+      )
+    }
+    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+  >
+    <FileText size={16} />
+    Create Report
+  </button>
+)}
+
+{/* SEE PATIENT LAB REPORTS */}
+{appointment.patientId != null && (
+  <button
+    type="button"
+    onClick={() =>
+      navigate(
+        `/doctor/patients/${appointment.patientId}/history`
+      )
+    }
+    className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50"
+  >
+    <Eye size={16} />
+    Lab Reports
+  </button>
+)}
 
                               {/* COMPLETE */}
                               {!isCompleted && (
