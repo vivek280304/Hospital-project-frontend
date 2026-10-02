@@ -111,32 +111,35 @@ export default function TestResults() {
     }
   };
 
-  const filteredResults = useMemo(() => {
-    const query = search
-      .trim()
-      .toLowerCase();
+ const filteredResults = useMemo(() => {
+  const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return results;
-    }
+  // First sort by orderId DESC
+  const sortedResults = [...results].sort(
+    (a, b) => Number(getOrderId(b)) - Number(getOrderId(a))
+  );
 
-    return results.filter((order) => {
-      return (
-        getPatientName(order)
-          .toLowerCase()
-          .includes(query) ||
-        getTestName(order)
-          .toLowerCase()
-          .includes(query) ||
-        getDoctorName(order)
-          .toLowerCase()
-          .includes(query) ||
-        String(getOrderId(order))
-          .toLowerCase()
-          .includes(query)
-      );
-    });
-  }, [results, search]);
+  if (!query) {
+    return sortedResults;
+  }
+
+  return sortedResults.filter((order) => {
+    return (
+      getPatientName(order)
+        .toLowerCase()
+        .includes(query) ||
+      getTestName(order)
+        .toLowerCase()
+        .includes(query) ||
+      getDoctorName(order)
+        .toLowerCase()
+        .includes(query) ||
+      String(getOrderId(order))
+        .toLowerCase()
+        .includes(query)
+    );
+  });
+}, [results, search]);
 
   return (
     <div className="min-h-screen bg-gray-50">
