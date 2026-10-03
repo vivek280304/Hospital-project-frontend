@@ -92,11 +92,11 @@ export default function DoctorSharePatient() {
        * This assumes SharePatientRequest contains doctorId.
        */
       await doctorService.sharePatient(
-        Number(patientId),
-        {
-          doctorId: Number(selectedDoctorId),
-        }
-      );
+  Number(patientId),
+  {
+    juniorDoctorID: Number(selectedDoctorId),
+  }
+);
 
       setSuccess(
         "Patient reports shared successfully."

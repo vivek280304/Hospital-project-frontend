@@ -136,15 +136,24 @@ const doctorService = {
     return response.data;
   },
 
-  sharePatient: async (patientId, data) => {
+ sharePatient: async (patientId, data) => {
   const response = await api.post(
     `/doctor/patient/${patientId}/share`,
-    data
+    {
+      juniorDoctorID: Number(data.juniorDoctorID),
+    }
   );
+
   return response.data;
 },
 
+getSharedPatientLabResults: async (patientId) => {
+  const response = await api.get(
+    `/doctor/shared-patients/${patientId}/lab-results`
+  );
 
+  return response.data;
+},
 
 
 };

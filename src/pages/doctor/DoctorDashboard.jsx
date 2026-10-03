@@ -18,6 +18,7 @@ import {
   UserRound,
   Users,
   X,
+  Share2, 
 } from "lucide-react";
 
 /* ============================================================
@@ -517,6 +518,15 @@ function DoctorDashboard() {
                 })
             }
           />
+      <SidebarItem
+  icon={<Share2 size={20} />}
+  label="Shared Patients"
+  onClick={() =>
+    navigate("/doctor/shared-patients")
+  }
+/>
+
+          
 
           <SidebarItem
             icon={<UserRound size={20} />}

@@ -54,7 +54,8 @@ import DoctorProfile from "../pages/doctor/DoctorProfile";
 import MedicalReport from "../pages/doctor/MedicalReport";
 import DoctorChangePassword from "../pages/doctor/DoctorChangePassword";
 import DoctorSharePatient from "../pages/doctor/DoctorSharePatient";
-
+import SharedPatients from "../pages/doctor/SharedPatients";
+import SharedPatientDetails from "../pages/doctor/SharedPatientDetails";
 // =========================
 // RECEPTIONIST AUTH
 // =========================
@@ -279,6 +280,14 @@ function AppRoutes() {
       <Route
   path="/doctor/patients/:patientId/lab-reports"
   element={<PatientLabReports />}
+/>
+<Route
+  path="/doctor/shared-patients"
+  element={<SharedPatients />}
+/>
+<Route
+  path="/doctor/shared-patients/:patientId"
+  element={<SharedPatientDetails />}
 />
 
 
