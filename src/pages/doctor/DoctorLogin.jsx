@@ -32,42 +32,131 @@ function DoctorLogin() {
 
   // ================= PASSWORD LOGIN =================
 
-  const handlePasswordLogin = async (e) => {
-    e.preventDefault();
+  // ================= PASSWORD LOGIN =================
 
-    setError("");
-    setSuccess("");
+const handlePasswordLogin = async (e) => {
+  e.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter email and password.");
+  setError("");
+  setSuccess("");
+
+  if (!email.trim() || !password.trim()) {
+    setError("Please enter email and password.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // Clear old session before login
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userRole");
+
+    const response = await authService.login({
+      email: email.trim(),
+      password,
+    });
+
+    console.log("Doctor login response:", response);
+
+    const token =
+      response?.accessToken ||
+      response?.token;
+
+    if (!token) {
+      throw new Error("Login failed. Access token was not returned.");
+    }
+
+    // Get role from login response
+    let role =
+      response?.role ||
+      response?.roles ||
+      response?.authorities;
+
+    // If role is not directly returned, decode JWT
+    if (!role) {
+      try {
+        const payload = JSON.parse(
+          atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+        );
+
+        role =
+          payload?.role ||
+          payload?.roles ||
+          payload?.authorities;
+      } catch (decodeError) {
+        console.error("Unable to decode JWT:", decodeError);
+      }
+    }
+
+    // Normalize role
+    if (Array.isArray(role)) {
+      role = role[0];
+    }
+
+    if (typeof role === "object" && role !== null) {
+      role =
+        role.authority ||
+        role.role ||
+        null;
+    }
+
+    if (typeof role === "string") {
+      role = role
+        .replace(/^ROLE_/i, "")
+        .toUpperCase();
+    }
+
+    console.log("Doctor portal detected role:", role);
+
+    // IMPORTANT:
+    // Do NOT allow other roles into Doctor portal
+    if (role !== "DOCTOR") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userRole");
+
+      setError(
+        "This account does not belong to the Doctor portal."
+      );
+
       return;
     }
 
-    try {
-      setLoading(true);
+    // Only genuine doctor accounts reach here
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("userRole", "DOCTOR");
 
-      const response = await authService.login({
-        email: email.trim(),
-        password,
-      });
-
-      console.log("Doctor login response:", response);
-
-      navigate("/doctor/dashboard", {
-        replace: true,
-      });
-    } catch (err) {
-      console.error("Doctor login error:", err);
-
-      setError(
-        err?.response?.data?.message ||
-          err?.response?.data ||
-          "Invalid email or password."
+    if (response?.refreshToken) {
+      localStorage.setItem(
+        "refreshToken",
+        response.refreshToken
       );
-    } finally {
-      setLoading(false);
     }
-  };
+
+    navigate("/doctor/dashboard", {
+      replace: true,
+    });
+
+  } catch (err) {
+    console.error("Doctor login error:", err);
+
+    // Make sure wrong/failed login never leaves an old token
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userRole");
+
+    setError(
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      "Invalid email or password."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ================= REQUEST OTP =================
 
