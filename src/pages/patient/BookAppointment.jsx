@@ -32,8 +32,6 @@ function BookAppointment() {
   const [doctor, setDoctor] = useState(null);
   const [profile, setProfile] = useState(null);
 
-  const [reason, setReason] = useState("");
-
   const [patientDetails, setPatientDetails] = useState({
     dateOfBirth: "",
     gender: "",
@@ -44,6 +42,9 @@ function BookAppointment() {
   const [booking, setBooking] = useState(false);
 
   const [bookingResult, setBookingResult] = useState(null);
+
+  // Backend-confirmed appointment information
+  const [confirmation, setConfirmation] = useState(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -181,6 +182,106 @@ function BookAppointment() {
 
 
   // =========================================================
+  // WAIT FOR WEBHOOK CONFIRMATION
+  // =========================================================
+
+  const waitForPaymentConfirmation = async (orderId) => {
+
+    const maxAttempts = 30;
+
+    for (
+      let attempt = 0;
+      attempt < maxAttempts;
+      attempt++
+    ) {
+
+      try {
+
+        console.log(
+          `Checking payment status... attempt ${attempt + 1}`
+        );
+
+        const result =
+          await paymentService.getPaymentStatus(
+            orderId
+          );
+
+        console.log(
+          "Payment status response:",
+          result
+        );
+
+
+        // =====================================================
+        // PAYMENT SUCCESS
+        // =====================================================
+
+        if (result.status === "SUCCESS") {
+
+          setConfirmation(result);
+
+          setBookingResult("success");
+
+          setSuccess(
+            "Appointment confirmed successfully."
+          );
+
+          return;
+        }
+
+
+        // =====================================================
+        // PAYMENT FAILED
+        // =====================================================
+
+        if (
+          result.status === "FAILED" ||
+          result.status === "CANCELLED"
+        ) {
+
+          setError(
+            "Payment was not successful. Your appointment was not confirmed."
+          );
+
+          setBookingResult("failed");
+
+          return;
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Payment status check failed:",
+          error
+        );
+
+      }
+
+
+      // Wait 2 seconds before checking again
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(resolve, 2000)
+      );
+
+    }
+
+
+    // =========================================================
+    // TIMEOUT
+    // =========================================================
+
+    setError(
+      "Payment is taking longer than expected. Please check your appointments after some time."
+    );
+
+    setBookingResult("failed");
+
+  };
+
+
+  // =========================================================
   // PAYMENT + BOOKING
   // =========================================================
 
@@ -193,7 +294,10 @@ function BookAppointment() {
     }
 
 
-    // Cashfree not ready
+    // =========================================================
+    // CASHFREE NOT READY
+    // =========================================================
+
     if (!cashfree) {
 
       setError(
@@ -204,7 +308,10 @@ function BookAppointment() {
     }
 
 
-    // Patient profile missing
+    // =========================================================
+    // PATIENT PROFILE MISSING
+    // =========================================================
+
     if (!profile) {
 
       setError(
@@ -215,7 +322,10 @@ function BookAppointment() {
     }
 
 
-    // Date of birth validation
+    // =========================================================
+    // DOB VALIDATION
+    // =========================================================
+
     if (!patientDetails.dateOfBirth) {
 
       setError(
@@ -226,7 +336,10 @@ function BookAppointment() {
     }
 
 
-    // Gender validation
+    // =========================================================
+    // GENDER VALIDATION
+    // =========================================================
+
     if (!patientDetails.gender) {
 
       setError(
@@ -237,8 +350,13 @@ function BookAppointment() {
     }
 
 
-    // Phone validation
-    if (!patientDetails.phoneNumber.trim()) {
+    // =========================================================
+    // PHONE VALIDATION
+    // =========================================================
+
+    if (
+      !patientDetails.phoneNumber.trim()
+    ) {
 
       setError(
         "Phone number is required."
@@ -253,6 +371,8 @@ function BookAppointment() {
       setBooking(true);
 
       setBookingResult(null);
+
+      setConfirmation(null);
 
       setError("");
 
@@ -282,9 +402,6 @@ function BookAppointment() {
 
         appointmentTime:
           appointmentData.appointmentTime,
-
-        reason:
-          reason.trim() || null,
       };
 
 
@@ -297,17 +414,14 @@ function BookAppointment() {
       // =====================================================
       // BACKEND
       //
-      // This endpoint:
+      // 1. Validate doctor
+      // 2. Validate schedule
+      // 3. Create slot hold
+      // 4. Create Cashfree order
+      // 5. Create Payment(CREATED)
+      // 6. Return paymentSessionId + orderId
       //
-      // 1. Validates doctor
-      // 2. Validates schedule
-      // 3. Creates slot hold
-      // 4. Creates Cashfree order
-      // 5. Creates Payment(CREATED)
-      // 6. Returns paymentSessionId
-      //
-      // IMPORTANT:
-      // It DOES NOT create Appointment yet.
+      // Appointment is NOT created here.
       // =====================================================
 
       const paymentData =
@@ -326,10 +440,25 @@ function BookAppointment() {
       // VALIDATE PAYMENT SESSION
       // =====================================================
 
-      if (!paymentData?.paymentSessionId) {
+      if (
+        !paymentData?.paymentSessionId
+      ) {
 
         throw new Error(
           "Payment session was not created."
+        );
+
+      }
+
+
+      // =====================================================
+      // VALIDATE ORDER ID
+      // =====================================================
+
+      if (!paymentData?.orderId) {
+
+        throw new Error(
+          "Payment order ID was not returned by server."
         );
 
       }
@@ -360,13 +489,22 @@ function BookAppointment() {
       // =====================================================
       // IMPORTANT
       //
-      // DO NOT mark appointment successful here.
+      // Cashfree checkout closing does NOT mean
+      // appointment is confirmed.
       //
-      // Cashfree checkout closing does NOT mean payment
-      // was successfully completed.
-      //
-      // The backend webhook is the final authority.
+      // Backend webhook is final authority.
       // =====================================================
+
+      setBooking(true);
+
+
+      // =====================================================
+      // WAIT FOR BACKEND WEBHOOK
+      // =====================================================
+
+      await waitForPaymentConfirmation(
+        paymentData.orderId
+      );
 
     } catch (error) {
 
@@ -403,6 +541,8 @@ function BookAppointment() {
   const handleTryAgain = () => {
 
     setBookingResult(null);
+
+    setConfirmation(null);
 
     setError("");
 
@@ -538,7 +678,7 @@ function BookAppointment() {
 
 
       {/* ===================================================
-          BOOKING / PAYMENT PROCESSING OVERLAY
+          BOOKING / PAYMENT OVERLAY
       =================================================== */}
 
       {(booking || bookingResult) && (
@@ -572,21 +712,21 @@ function BookAppointment() {
 
                 <h2 className="mt-6 text-2xl font-bold text-[#10255c]">
 
-                  Opening Payment
+                  Confirming Appointment
 
                 </h2>
 
 
                 <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-500">
 
-                  Please wait while we securely open the payment window.
+                  Payment received. We are waiting for secure payment verification and appointment confirmation.
 
                 </p>
 
 
                 <div className="mt-6 rounded-2xl bg-blue-50 px-4 py-3 text-xs font-medium text-blue-700">
 
-                  Do not close this page.
+                  Please do not close this page.
 
                 </div>
 
@@ -604,13 +744,11 @@ function BookAppointment() {
 
             {/* =================================================
                 SUCCESS
-                NOTE:
-                This is NOT automatically triggered after
-                Cashfree checkout.
             ================================================= */}
 
             {!booking &&
-              bookingResult === "success" && (
+              bookingResult === "success" &&
+              confirmation && (
 
                 <>
 
@@ -635,16 +773,18 @@ function BookAppointment() {
                   </h2>
 
 
-                  <p className="mt-2 text-sm text-slate-500">
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
 
                     Your payment was successful and your appointment has been booked.
 
                   </p>
 
 
+                  {/* APPOINTMENT DETAILS */}
+
                   <div className="mt-6 rounded-2xl border border-green-100 bg-green-50 p-4 text-left">
 
-                    <p className="text-xs font-medium text-green-700">
+                    <p className="text-xs font-semibold text-green-700">
 
                       Appointment Details
 
@@ -660,13 +800,68 @@ function BookAppointment() {
 
                     <p className="mt-1 text-sm text-slate-600">
 
-                      {appointmentData.appointmentDate}
+                      {confirmation.appointmentDate}
 
                       {" · "}
 
-                      {appointmentData.appointmentTime}
+                      {confirmation.appointmentTime}
 
                     </p>
+
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+
+                      {/* APPOINTMENT ID */}
+
+                      <div className="rounded-xl bg-white p-3">
+
+                        <p className="text-xs text-slate-500">
+
+                          Appointment ID
+
+                        </p>
+
+                        <p className="mt-1 font-semibold text-slate-900">
+
+                          #{confirmation.appointmentId}
+
+                        </p>
+
+                      </div>
+
+
+                      {/* AMOUNT */}
+
+                      <div className="rounded-xl bg-white p-3">
+
+                        <p className="text-xs text-slate-500">
+
+                          Amount Paid
+
+                        </p>
+
+                        <p className="mt-1 font-semibold text-slate-900">
+
+                          ₹{confirmation.amount}
+
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* EMAIL MESSAGE */}
+
+                  <div className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+
+                    <CheckCircle2
+                      size={18}
+                    />
+
+                    Confirmation email sent to your registered email.
 
                   </div>
 
@@ -718,7 +913,7 @@ function BookAppointment() {
 
                   <p className="mt-2 text-sm leading-6 text-slate-500">
 
-                    We could not start the payment for this appointment.
+                    Your appointment has not been confirmed.
 
                   </p>
 
@@ -727,7 +922,7 @@ function BookAppointment() {
 
                     <p className="text-xs font-semibold text-red-700">
 
-                      Server Response
+                      Details
 
                     </p>
 
@@ -945,6 +1140,8 @@ function BookAppointment() {
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
 
 
+              {/* DATE */}
+
               <div className="rounded-2xl border border-slate-200 p-5">
 
                 <div className="flex items-center gap-3">
@@ -976,6 +1173,8 @@ function BookAppointment() {
 
               </div>
 
+
+              {/* TIME */}
 
               <div className="rounded-2xl border border-slate-200 p-5">
 
@@ -1181,38 +1380,6 @@ function BookAppointment() {
 
 
             {/* =================================================
-                REASON
-            ================================================= */}
-
-            <div className="mt-7">
-
-              <label className="text-sm font-semibold text-slate-700">
-
-                Reason for Visit
-
-                <span className="ml-1 font-normal text-slate-400">
-
-                  (optional)
-
-                </span>
-
-              </label>
-
-
-              <textarea
-                value={reason}
-                onChange={(e) =>
-                  setReason(e.target.value)
-                }
-                rows={4}
-                placeholder="Briefly describe your reason for visiting..."
-                className="mt-2 w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-
-            </div>
-
-
-            {/* =================================================
                 ERROR
             ================================================= */}
 
@@ -1231,7 +1398,7 @@ function BookAppointment() {
                 SUCCESS
             ================================================= */}
 
-            {success && (
+            {success && !bookingResult && (
 
               <div className="mt-5 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
 
@@ -1269,7 +1436,7 @@ function BookAppointment() {
                       className="animate-spin"
                     />
 
-                    Opening Payment...
+                    Confirming Appointment...
 
                   </>
 

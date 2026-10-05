@@ -11,6 +11,14 @@ const paymentService = {
     return response.data;
   },
 
+  async getPaymentStatus(orderId) {
+    const response = await api.get(
+      `/patient/appointments/payment/${orderId}/status`
+    );
+
+    return response.data;
+  },
+
 };
 
 export default paymentService;
