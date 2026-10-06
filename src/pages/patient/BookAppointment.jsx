@@ -1303,48 +1303,21 @@ function BookAppointment() {
                 </div>
 
 
-                {/* GENDER */}
+                
+{/* GENDER */}
 
-                <div>
+<div>
+  <label className="mb-2 block text-sm font-medium text-slate-700">
+    Gender
+  </label>
 
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
-
-                    Gender
-
-                    <span className="ml-1 text-red-500">
-                      *
-                    </span>
-
-                  </label>
-
-
-                  <select
-                    name="gender"
-                    value={patientDetails.gender}
-                    onChange={handlePatientDetailsChange}
-                    required
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-
-                    <option value="">
-                      Select gender
-                    </option>
-
-                    <option value="MALE">
-                      Male
-                    </option>
-
-                    <option value="FEMALE">
-                      Female
-                    </option>
-
-                    <option value="OTHER">
-                      Other
-                    </option>
-
-                  </select>
-
-                </div>
+  <input
+    type="text"
+    value={patientDetails.gender || "Not available"}
+    disabled
+    className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600"
+  />
+</div>
 
 
                 {/* PHONE */}
