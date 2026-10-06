@@ -465,7 +465,7 @@ export default function Appointments() {
                         </p>
 
                         <p className="mt-0.5 truncate text-sm font-bold text-slate-900 sm:text-base">
-                          Dr. {appointment.doctorName}
+                          {appointment.doctorName}
                         </p>
 
                         <p className="mt-0.5 text-xs text-slate-500">

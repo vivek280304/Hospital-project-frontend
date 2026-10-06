@@ -1400,25 +1400,18 @@ export default function ReceptionistDashboard() {
                             .toUpperCase()}
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">
-                            {doctorName}
-                          </p>
+                       
+<div className="flex-1 min-w-0">
+  <p className="font-semibold text-sm truncate">
+    {doctorName}
+  </p>
 
-                          <p className="text-xs text-slate-400">
-                            {specialization}
-                          </p>
-                        </div>
+  <p className="text-xs text-slate-400">
+    {specialization}
+  </p>
+</div>
 
-                        {doctor.workingToday ? (
-                          <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-[10px] font-semibold">
-                            Available
-                          </span>
-                        ) : (
-                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-[10px] font-semibold">
-                            Off
-                          </span>
-                        )}
+
 
                         {doctor.workingToday ? (
                           <button
