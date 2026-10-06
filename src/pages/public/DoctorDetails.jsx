@@ -104,7 +104,7 @@ function DoctorDetails() {
 
           <button
             onClick={() => navigate("/")}
-            className="mt-6 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            className="mt-6 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
           >
             Back to Doctors
           </button>
@@ -181,12 +181,14 @@ function DoctorDetails() {
           Back to Doctors
         </button>
 
+
         {/* =====================================================
             DOCTOR PROFILE HEADER
         ===================================================== */}
 
         <section
           className="
+            overflow-hidden
             rounded-3xl
             border
             border-slate-200
@@ -244,6 +246,7 @@ function DoctorDetails() {
 
             </div>
 
+
             {/* =================================================
                 PROFILE DETAILS
             ================================================= */}
@@ -263,6 +266,7 @@ function DoctorDetails() {
 
               </div>
 
+
               <h1
                 className="
                   mt-3
@@ -276,49 +280,86 @@ function DoctorDetails() {
                 {name}
               </h1>
 
+
               {qualification && (
                 <p className="mt-2 text-sm font-medium text-slate-500">
                   {qualification}
                 </p>
               )}
 
+
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
 
                 {experience != null && (
                   <div className="flex items-center gap-2 text-sm text-slate-500">
+
                     <BriefcaseBusiness
                       size={16}
                       className="text-blue-500"
                     />
 
                     {experience}+ years experience
+
                   </div>
                 )}
 
+
                 <div className="flex items-center gap-2 text-sm text-slate-500">
+
                   <ShieldCheck
                     size={16}
                     className="text-emerald-500"
                   />
 
                   Verified professional
+
                 </div>
 
               </div>
 
             </div>
 
+
             {/* =================================================
-                QUICK ACTION
+                QUICK ACTION + CONSULTATION FEE
             ================================================= */}
 
-            <div className="md:w-56">
+            <div className="w-full md:w-64">
+
+              {/* CONSULTATION FEE */}
+
+              <div className="mb-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+
+                <div className="flex items-center justify-between">
+
+                  <div>
+
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                      Consultation Fee
+                    </p>
+
+                    <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                      {consultationFee != null
+                        ? `₹${consultationFee}`
+                        : "Not available"}
+                    </p>
+
+                  </div>
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                    <IndianRupee size={20} />
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* CHECK AVAILABLE SLOTS */}
 
               <button
                 onClick={() =>
-                  navigate(
-                    `/doctors/${doctorId}/slots`
-                  )
+                  navigate(`/doctors/${doctorId}/slots`)
                 }
                 className="
                   flex
@@ -344,6 +385,7 @@ function DoctorDetails() {
                 <ArrowRight size={17} />
               </button>
 
+
               <p className="mt-2 text-center text-[11px] text-slate-400">
                 View dates & appointment times
               </p>
@@ -353,6 +395,7 @@ function DoctorDetails() {
           </div>
 
         </section>
+
 
         {/* =====================================================
             CONTENT
@@ -385,20 +428,27 @@ function DoctorDetails() {
               />
 
               <p className="mt-5 text-sm leading-7 text-slate-600">
+
                 Consult with{" "}
+
                 <span className="font-semibold text-slate-800">
                   {name}
                 </span>
+
                 , a qualified{" "}
+
                 <span className="font-semibold text-blue-600">
                   {specialization.toLowerCase()}
                 </span>{" "}
+
                 specialist. You can check the doctor's
                 availability and select an appointment
                 slot that works for you.
+
               </p>
 
             </section>
+
 
             {/* =================================================
                 PROFESSIONAL DETAILS
@@ -452,6 +502,7 @@ function DoctorDetails() {
 
             </section>
 
+
             {/* =================================================
                 CONTACT
             ================================================= */}
@@ -488,6 +539,7 @@ function DoctorDetails() {
             )}
 
           </div>
+
 
           {/* ===================================================
               RIGHT - APPOINTMENT PANEL
@@ -537,6 +589,7 @@ function DoctorDetails() {
 
               </div>
 
+
               {/* APPOINTMENT FEATURES */}
 
               <div className="space-y-3 p-6">
@@ -571,6 +624,7 @@ function DoctorDetails() {
 
                 </div>
 
+
                 {/* FLEXIBLE DATES */}
 
                 <AppointmentFeature
@@ -578,6 +632,7 @@ function DoctorDetails() {
                   title="Flexible dates"
                   text="Choose a date that works for you"
                 />
+
 
                 {/* AVAILABLE TIME SLOTS */}
 
@@ -587,6 +642,7 @@ function DoctorDetails() {
                   text="See real-time appointment availability"
                 />
 
+
                 {/* SECURE BOOKING */}
 
                 <AppointmentFeature
@@ -595,13 +651,12 @@ function DoctorDetails() {
                   text="Your appointment information is protected"
                 />
 
+
                 {/* PRIMARY BUTTON */}
 
                 <button
                   onClick={() =>
-                    navigate(
-                      `/doctors/${doctorId}/slots`
-                    )
+                    navigate(`/doctors/${doctorId}/slots`)
                   }
                   className="
                     mt-3
@@ -626,6 +681,7 @@ function DoctorDetails() {
                   <ArrowRight size={18} />
                 </button>
 
+
                 <p className="text-center text-[11px] leading-5 text-slate-400">
                   Select your preferred date and appointment
                   time on the next screen.
@@ -644,6 +700,7 @@ function DoctorDetails() {
     </div>
   );
 }
+
 
 /* =============================================================
    SECTION HEADING
@@ -667,6 +724,7 @@ function SectionHeading({
     </div>
   );
 }
+
 
 /* =============================================================
    DETAIL
@@ -701,6 +759,7 @@ function Detail({
   );
 }
 
+
 /* =============================================================
    APPOINTMENT FEATURE
 ============================================================= */
@@ -732,5 +791,6 @@ function AppointmentFeature({
     </div>
   );
 }
+
 
 export default DoctorDetails;
