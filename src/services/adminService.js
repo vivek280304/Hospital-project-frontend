@@ -85,6 +85,15 @@ const adminService = {
 
     return response.data;
   },
+
+ changeDoctorFee: async ({ email, amount }) => {
+    const response = await api.patch("/admin/doctors/fee", {
+        email,
+        amount,
+    });
+
+    return response.data;
+},
 };
 
 export default adminService;

@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Clock3,
   MapPin,
+  IndianRupee,
 } from "lucide-react";
+
 import { useNavigate, useParams } from "react-router-dom";
 
 import Navbar from "../../components/public/Navbar";
@@ -26,21 +28,23 @@ function DoctorDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // =========================================================
+  // LOAD DOCTOR
+  // =========================================================
+
   useEffect(() => {
     const loadDoctor = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const data =
-          await doctorService.getDoctorById(doctorId);
+        const data = await doctorService.getDoctorById(doctorId);
+
+        console.log("Doctor details:", data);
 
         setDoctor(data);
       } catch (error) {
-        console.error(
-          "Doctor details error:",
-          error
-        );
+        console.error("Doctor details error:", error);
 
         setError(
           error.response?.data?.message ||
@@ -55,9 +59,9 @@ function DoctorDetails() {
     loadDoctor();
   }, [doctorId]);
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
+  // =========================================================
+  // LOADING
+  // =========================================================
 
   if (loading) {
     return (
@@ -78,15 +82,15 @@ function DoctorDetails() {
     );
   }
 
-  /* =========================================================
-     ERROR
-  ========================================================= */
+  // =========================================================
+  // ERROR
+  // =========================================================
 
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F7F9FC] px-5">
         <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-2xl font-bold text-red-500">
             !
           </div>
 
@@ -111,9 +115,9 @@ function DoctorDetails() {
 
   if (!doctor) return null;
 
-  /* =========================================================
-     DATA
-  ========================================================= */
+  // =========================================================
+  // DATA
+  // =========================================================
 
   const name =
     doctor.name ??
@@ -140,9 +144,12 @@ function DoctorDetails() {
     doctor.degree ??
     doctor.education;
 
-  /* =========================================================
-     PAGE
-  ========================================================= */
+  // Consultation fee
+  const consultationFee = doctor.consultationFee;
+
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
     <div className="min-h-screen bg-[#F7F9FC]">
@@ -174,7 +181,6 @@ function DoctorDetails() {
           Back to Doctors
         </button>
 
-
         {/* =====================================================
             DOCTOR PROFILE HEADER
         ===================================================== */}
@@ -195,7 +201,6 @@ function DoctorDetails() {
               flex-col
               gap-6
               p-5
-
               sm:p-7
               md:flex-row
               md:items-center
@@ -219,7 +224,6 @@ function DoctorDetails() {
                 rounded-3xl
                 bg-blue-50
                 text-blue-600
-
                 sm:h-32
                 sm:w-32
               "
@@ -240,7 +244,6 @@ function DoctorDetails() {
 
             </div>
 
-
             {/* =================================================
                 PROFILE DETAILS
             ================================================= */}
@@ -260,7 +263,6 @@ function DoctorDetails() {
 
               </div>
 
-
               <h1
                 className="
                   mt-3
@@ -268,20 +270,17 @@ function DoctorDetails() {
                   font-extrabold
                   tracking-tight
                   text-slate-900
-
                   sm:text-3xl
                 "
               >
                 {name}
               </h1>
 
-
               {qualification && (
                 <p className="mt-2 text-sm font-medium text-slate-500">
                   {qualification}
                 </p>
               )}
-
 
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
 
@@ -308,7 +307,6 @@ function DoctorDetails() {
               </div>
 
             </div>
-
 
             {/* =================================================
                 QUICK ACTION
@@ -337,7 +335,6 @@ function DoctorDetails() {
                   text-white
                   shadow-sm
                   transition
-
                   hover:bg-blue-700
                   hover:shadow-md
                 "
@@ -357,7 +354,6 @@ function DoctorDetails() {
 
         </section>
 
-
         {/* =====================================================
             CONTENT
         ===================================================== */}
@@ -367,7 +363,6 @@ function DoctorDetails() {
             mt-6
             grid
             gap-6
-
             lg:grid-cols-[1.35fr_0.65fr]
           "
         >
@@ -405,7 +400,6 @@ function DoctorDetails() {
 
             </section>
 
-
             {/* =================================================
                 PROFESSIONAL DETAILS
             ================================================= */}
@@ -422,7 +416,6 @@ function DoctorDetails() {
                   mt-5
                   grid
                   gap-3
-
                   sm:grid-cols-2
                 "
               >
@@ -459,7 +452,6 @@ function DoctorDetails() {
 
             </section>
 
-
             {/* =================================================
                 CONTACT
             ================================================= */}
@@ -479,6 +471,7 @@ function DoctorDetails() {
                   </div>
 
                   <div>
+
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                       Email
                     </p>
@@ -486,6 +479,7 @@ function DoctorDetails() {
                     <p className="mt-1 break-all text-sm font-medium text-slate-700">
                       {email}
                     </p>
+
                   </div>
 
                 </div>
@@ -494,7 +488,6 @@ function DoctorDetails() {
             )}
 
           </div>
-
 
           {/* ===================================================
               RIGHT - APPOINTMENT PANEL
@@ -544,10 +537,41 @@ function DoctorDetails() {
 
               </div>
 
-
               {/* APPOINTMENT FEATURES */}
 
               <div className="space-y-3 p-6">
+
+                {/* =================================================
+                    CONSULTATION FEE
+                ================================================= */}
+
+                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+
+                  <div className="flex items-center justify-between">
+
+                    <div>
+
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                        Consultation Fee
+                      </p>
+
+                      <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                        {consultationFee != null
+                          ? `₹${consultationFee}`
+                          : "Not available"}
+                      </p>
+
+                    </div>
+
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                      <IndianRupee size={21} />
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* FLEXIBLE DATES */}
 
                 <AppointmentFeature
                   icon={CalendarDays}
@@ -555,18 +579,21 @@ function DoctorDetails() {
                   text="Choose a date that works for you"
                 />
 
+                {/* AVAILABLE TIME SLOTS */}
+
                 <AppointmentFeature
                   icon={Clock3}
                   title="Available time slots"
                   text="See real-time appointment availability"
                 />
 
+                {/* SECURE BOOKING */}
+
                 <AppointmentFeature
                   icon={ShieldCheck}
                   title="Secure booking"
                   text="Your appointment information is protected"
                 />
-
 
                 {/* PRIMARY BUTTON */}
 
@@ -591,7 +618,6 @@ function DoctorDetails() {
                     font-bold
                     text-white
                     transition
-
                     hover:bg-blue-700
                   "
                 >
@@ -619,7 +645,6 @@ function DoctorDetails() {
   );
 }
 
-
 /* =============================================================
    SECTION HEADING
 ============================================================= */
@@ -642,7 +667,6 @@ function SectionHeading({
     </div>
   );
 }
-
 
 /* =============================================================
    DETAIL
@@ -677,7 +701,6 @@ function Detail({
   );
 }
 
-
 /* =============================================================
    APPOINTMENT FEATURE
 ============================================================= */
@@ -709,6 +732,5 @@ function AppointmentFeature({
     </div>
   );
 }
-
 
 export default DoctorDetails;
