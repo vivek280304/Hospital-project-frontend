@@ -17,9 +17,10 @@ function Navbar() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  /*
-   * Check whether patient is logged in
-   */
+  /* =====================================================
+     CHECK LOGIN STATUS
+  ===================================================== */
+
   const checkLoginStatus = () => {
     const tokenKeys = [
       "token",
@@ -42,19 +43,18 @@ function Navbar() {
     setIsLoggedIn(loggedIn);
   };
 
-  /*
-   * Check login status whenever the page/route changes.
-   *
-   * This is important because localStorage "storage"
-   * event does not fire in the same browser tab.
-   */
+  /* =====================================================
+     CHECK WHEN ROUTE CHANGES
+  ===================================================== */
+
   useEffect(() => {
     checkLoginStatus();
   }, [location.pathname]);
 
-  /*
-   * Also listen for localStorage changes from another tab.
-   */
+  /* =====================================================
+     LISTEN FOR OTHER TABS
+  ===================================================== */
+
   useEffect(() => {
     const handleStorageChange = () => {
       checkLoginStatus();
@@ -73,13 +73,11 @@ function Navbar() {
     };
   }, []);
 
-  /*
-   * Logout
-   */
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+
   const handleLogout = () => {
-    /*
-     * Remove all possible authentication tokens.
-     */
     const tokenKeys = [
       "token",
       "accessToken",
@@ -94,10 +92,6 @@ function Navbar() {
       localStorage.removeItem(key);
     });
 
-    /*
-     * Also remove authentication information
-     * if your application uses sessionStorage.
-     */
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("access_token");
@@ -106,14 +100,8 @@ function Navbar() {
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("refresh_token");
 
-    /*
-     * Update Navbar immediately.
-     */
     setIsLoggedIn(false);
 
-    /*
-     * Go back to Home.
-     */
     navigate("/", {
       replace: true,
     });
@@ -121,43 +109,69 @@ function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-[76px] max-w-[1400px] items-center justify-between px-5">
 
-        {/* ================= LOGO ================= */}
+      <div className="mx-auto flex h-[72px] w-full max-w-[1400px] items-center justify-between px-3 sm:h-[76px] sm:px-5 lg:px-8">
+
+        {/* =================================================
+            LOGO
+        ================================================= */}
 
         <Link
           to="/"
-          className="flex items-center gap-3"
+          className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-            <HeartPulse size={25} />
+
+          {/* LOGO ICON */}
+
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm sm:h-11 sm:w-11">
+            <HeartPulse
+              size={22}
+              className="sm:hidden"
+            />
+
+            <HeartPulse
+              size={25}
+              className="hidden sm:block"
+            />
           </div>
 
-          <div>
-            <h1 className="text-xl font-bold leading-none text-[#10255c]">
+
+          {/* LOGO TEXT */}
+
+          <div className="min-w-0">
+
+            <h1 className="text-[18px] font-extrabold leading-none tracking-tight text-[#10255c] sm:text-xl">
               MediCare
             </h1>
 
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 hidden text-[10px] font-medium leading-3 text-slate-500 min-[400px]:block sm:text-[11px]">
               Hospital Management
             </p>
+
           </div>
+
         </Link>
 
-        {/* ================= NAVIGATION ================= */}
 
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* =================================================
+            DESKTOP NAVIGATION
+        ================================================= */}
+
+        <nav className="hidden items-center gap-7 md:flex lg:gap-9">
 
           {/* HOME */}
 
           <Link
             to="/"
-            className="border-b-2 border-blue-600 py-7 text-sm font-semibold text-blue-600"
+            className={`py-7 text-sm font-semibold transition ${
+              location.pathname === "/"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-slate-600 hover:text-blue-600"
+            }`}
           >
             Home
           </Link>
 
-          {/* FIND DOCTORS REMOVED */}
 
           {/* SERVICES */}
 
@@ -168,6 +182,7 @@ function Navbar() {
             Services
           </a>
 
+
           {/* ABOUT */}
 
           <a
@@ -176,6 +191,7 @@ function Navbar() {
           >
             About
           </a>
+
 
           {/* CONTACT */}
 
@@ -188,32 +204,66 @@ function Navbar() {
 
         </nav>
 
-        {/* ================= AUTH ================= */}
+
+        {/* =================================================
+            AUTH
+        ================================================= */}
 
         {!isLoggedIn ? (
 
-          /*
-           * LOGGED OUT
-           *
-           * Show Login + Sign Up
-           */
-
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
 
             {/* LOGIN */}
 
             <Link
               to="/patient/login"
-              className="rounded-lg border border-blue-600 px-5 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                rounded-xl
+                border
+                border-blue-600
+                px-3
+                text-xs
+                font-bold
+                text-blue-600
+                transition
+                hover:bg-blue-50
+                min-[400px]:px-4
+                sm:h-11
+                sm:px-5
+                sm:text-sm
+              "
             >
               Login
             </Link>
+
 
             {/* SIGN UP */}
 
             <Link
               to="/patient/register"
-              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                rounded-xl
+                bg-blue-600
+                px-3
+                text-xs
+                font-bold
+                text-white
+                shadow-sm
+                transition
+                hover:bg-blue-700
+                min-[400px]:px-4
+                sm:h-11
+                sm:px-5
+                sm:text-sm
+              "
             >
               Sign Up
             </Link>
@@ -222,35 +272,70 @@ function Navbar() {
 
         ) : (
 
-          /*
-           * LOGGED IN
-           *
-           * Show Dashboard + Logout
-           */
-
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
 
             {/* DASHBOARD */}
 
             <Link
               to="/patient/dashboard"
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                gap-1.5
+                rounded-xl
+                bg-blue-600
+                px-3
+                text-xs
+                font-bold
+                text-white
+                transition
+                hover:bg-blue-700
+                sm:h-11
+                sm:gap-2
+                sm:px-5
+                sm:text-sm
+              "
             >
-              <LayoutDashboard size={17} />
+              <LayoutDashboard size={16} />
 
-              Dashboard
+              <span>
+                Dashboard
+              </span>
             </Link>
+
 
             {/* LOGOUT */}
 
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                gap-1.5
+                rounded-xl
+                bg-red-50
+                px-3
+                text-xs
+                font-bold
+                text-red-600
+                transition
+                hover:bg-red-100
+                sm:h-11
+                sm:gap-2
+                sm:px-5
+                sm:text-sm
+              "
             >
-              <LogOut size={17} />
+              <LogOut size={16} />
 
-              Logout
+              <span>
+                Logout
+              </span>
             </button>
 
           </div>
@@ -258,6 +343,7 @@ function Navbar() {
         )}
 
       </div>
+
     </header>
   );
 }

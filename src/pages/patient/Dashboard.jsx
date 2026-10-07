@@ -539,7 +539,7 @@ export default function Dashboard() {
                             sm:text-sm
                           "
                         >
-                          Dr.{" "}
+                          {" "}
                           {appointment.doctorName}
                         </p>
 

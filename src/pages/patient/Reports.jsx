@@ -30,17 +30,20 @@ export default function Reports() {
   useEffect(() => {
 
     patientService
-      .getReports()
+  .getReports()
+  .then((response) => {
+    const reports = Array.isArray(response)
+      ? response
+      : [];
 
-      .then((response) => {
+    const sortedReports = [...reports].sort(
+      (a, b) =>
+        Number(b.appointmentId || 0) -
+        Number(a.appointmentId || 0)
+    );
 
-        setData(
-          Array.isArray(response)
-            ? response
-            : []
-        );
-
-      })
+    setData(sortedReports);
+  })
 
       .catch((error) => {
 
