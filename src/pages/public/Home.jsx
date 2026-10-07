@@ -4,6 +4,7 @@ import Navbar from "../../components/public/Navbar";
 import Hero from "../../components/public/Hero";
 import DoctorSearch from "../../components/public/DoctorSearch";
 import DoctorList from "../../components/public/DoctorList";
+import Footer from "../../components/public/Footer";
 
 function Home() {
   const [specialization, setSpecialization] = useState("");
@@ -60,6 +61,8 @@ function Home() {
         </section>
 
       </main>
+
+      <Footer />
 
     </div>
   );
