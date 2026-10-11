@@ -3,7 +3,7 @@ import { useState } from "react";
 import Navbar from "../../components/public/Navbar";
 import Hero from "../../components/public/Hero";
 import DoctorSearch from "../../components/public/DoctorSearch";
-import DoctorList from "../../components/public/DoctorList";
+import DoctorList from "../../components/public/DoctorList.jsx";
 import Footer from "../../components/public/Footer";
 
 function Home() {
